@@ -27,18 +27,24 @@
 :root {
     --background: #ffffff;
     --foreground: #172022;
-    --primary: #16685b;
-    --primary-foreground: #ffffff;
-    --secondary: #edf6f4;
-    --secondary-foreground: #115f53;
+    --primary: #ff660a;
+    --primary-foreground: #172022;
+    --primary-hover: #ff7a2a;
+    --primary-active: #f05b00;
+    --primary-strong: #9b3700;
+    --primary-soft: #fff0e8;
+    --primary-soft-strong: #ffe0ce;
+    --primary-border: #ffc49f;
+    --secondary: var(--primary-soft);
+    --secondary-foreground: var(--primary-strong);
     --muted: #eceeef;
     --muted-foreground: #596367;
-    --accent: #edf6f4;
-    --accent-foreground: #115f53;
+    --accent: var(--primary-soft);
+    --accent-foreground: var(--primary-strong);
     --destructive: #c03939;
     --border: #dcdfe1;
     --input: #bfc6c8;
-    --ring: #488d82;
+    --ring: var(--primary);
     --radius: 0.5rem;
 
     /* Common Variables */
@@ -65,7 +71,7 @@
     --scrollbar-track-color: transparent;
     --scrollbar-thumb-color: #7b8f8b;
     --scrollbar-thumb-color-hover: #5f7772;
-    --scrollbar-thumb-color-active: #16685b;
+    --scrollbar-thumb-color-active: var(--primary);
 
     /* ── Небезпека (danger) ─────────────────────────────────────────────────── */
     --color-danger: #dc2626;
@@ -75,8 +81,8 @@
 
     /* ── Поверхні ───────────────────────────────────────────────────────────── */
     --color-surface-raised: #181818;
-    --color-surface-raised-hover: #1557b8;
-    --color-surface-raised-active: #0f4499;
+    --color-surface-raised-hover: var(--primary-hover);
+    --color-surface-raised-active: var(--primary-active);
 
     /* ── Текст ──────────────────────────────────────────────────────────────── */
     --color-text-primary: #ffffff;
@@ -100,7 +106,7 @@
 }
 
 ::selection {
-    color: var(--color-white-100);
+    color: var(--primary-foreground);
     background-color: var(--color-primary);
 }
 
