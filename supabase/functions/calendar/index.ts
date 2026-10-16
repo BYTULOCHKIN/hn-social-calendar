@@ -1,4 +1,5 @@
 import { withSupabase } from 'npm:@supabase/server@1';
+import { normalizeFunctionPath } from '../_shared/function-path.ts';
 
 type Topic =
     | 'Технічні питання'
@@ -12,7 +13,7 @@ const json = (body: unknown, status = 200) => Response.json(body, { status });
 
 const handler = withSupabase({ auth: 'publishable' }, async (request, context) => {
     const url = new URL(request.url);
-    const path = url.pathname.replace(/^.*\/calendar/, '');
+    const path = normalizeFunctionPath(url.pathname, 'calendar');
 
     if (request.method === 'GET' && path === '') {
         const subdivisionId = url.searchParams.get('subdivisionId');
