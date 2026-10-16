@@ -1159,6 +1159,7 @@ const Home: React.FC = () => {
                         )}
                     </div>
                     <Tabs
+                        className={view === 'calendar' || view === 'analytics' ? s.calendarWorkspace : undefined}
                         value={view}
                         onValueChange={(nextView) => {
                             return updateRoute({ view: nextView as View });
@@ -1241,7 +1242,7 @@ const Home: React.FC = () => {
                         <TabsContent value="analytics">
                             <AnalyticsView data={data} year={year} month={month} />
                         </TabsContent>
-                        <TabsContent value="calendar">
+                        <TabsContent value="calendar" className={s.calendarContent}>
                             <section className={s.calendarCard}>
                                 <div className={s.calendarMeta}>
                                     <span>
