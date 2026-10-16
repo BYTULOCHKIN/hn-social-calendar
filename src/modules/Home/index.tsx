@@ -1,4 +1,4 @@
-import type { CalendarData, SocialGroup, Topic } from '@/domain/calendar';
+import type { CalendarData, SocialGroup, Topic, WorkspaceSubdivision } from '@/domain/calendar';
 import React from 'react';
 import {
     calculateAnalytics,
@@ -11,11 +11,13 @@ import {
     weekdayShort,
     YEARS,
 } from '@/domain/calendar';
+import { Route } from '@/routes/index';
 import {
     BarChart3,
     CalendarDays,
     Check,
     ChevronDown,
+    ChevronRight,
     CircleHelp,
     ExternalLink,
     LayoutGrid,
@@ -47,11 +49,13 @@ const formatSavedTime = (date: Date | null) => {
 const GroupDialog = ({
     data,
     group,
+    workspace,
     onClose,
     onSave,
 }: {
     data: CalendarData;
     group: SocialGroup | null;
+    workspace: WorkspaceSubdivision;
     onClose: () => void;
     onSave: (_group: SocialGroup) => Promise<void>;
 }) => {
@@ -85,9 +89,9 @@ const GroupDialog = ({
             bush,
             employeeId,
             employeeName: employee.fullName,
-            subdivisionId: group?.subdivisionId ?? calendarApi.defaultSubdivisionId,
-            subdivisionName: group?.subdivisionName ?? 'Київський центральний підрозділ',
-            managementName: group?.managementName ?? 'Центральне управління',
+            subdivisionId: group?.subdivisionId ?? workspace.id,
+            subdivisionName: group?.subdivisionName ?? workspace.name,
+            managementName: group?.managementName ?? workspace.managementName,
             position: group?.position ?? data.groups.length + 1,
             active: group?.active ?? true,
         });
@@ -433,10 +437,9 @@ const AnalyticsView = ({ data, year, month }: { data: CalendarData; year: number
 };
 
 const Home: React.FC = () => {
+    const routeSearch = Route.useSearch();
+    const navigate = Route.useNavigate();
     const [data, setData] = React.useState<CalendarData | null>(null);
-    const [view, setView] = React.useState<View>('calendar');
-    const [year, setYear] = React.useState(initialYear);
-    const [month, setMonth] = React.useState(initialMonth);
     const [search, setSearch] = React.useState('');
     const [cellSelection, setCellSelection] = React.useState<CellSelection>(null);
     const [editingGroup, setEditingGroup] = React.useState<SocialGroup | 'new' | null>(null);
@@ -444,19 +447,74 @@ const Home: React.FC = () => {
     const [savedAt, setSavedAt] = React.useState<Date | null>(null);
     const [loadError, setLoadError] = React.useState<string | null>(null);
     const [reloadKey, setReloadKey] = React.useState(0);
+    const view: View = routeSearch.view ?? 'calendar';
+    const year = routeSearch.year ?? initialYear;
+    const month = routeSearch.month ?? initialMonth;
+    const subdivisionId = routeSearch.subdivision ?? calendarApi.defaultSubdivisionId;
+
+    const updateRoute = React.useCallback(
+        (patch: Partial<typeof routeSearch>, replace = false) => {
+            void navigate({
+                replace,
+                search: (previous) => {
+                    return { ...previous, ...patch };
+                },
+            });
+        },
+        [navigate]
+    );
 
     React.useEffect(() => {
+        let ignore = false;
         void calendarApi
-            .getCalendar(calendarApi.defaultSubdivisionId, year, month)
+            .getCalendar(subdivisionId, year, month)
             .then((calendar) => {
+                if (ignore) return;
                 setLoadError(null);
                 setData(calendar);
             })
             .catch((error: unknown) => {
+                if (ignore) return;
                 const message = error instanceof Error ? error.message : 'Не вдалося завантажити календар.';
                 setLoadError(message);
             });
-    }, [month, reloadKey, year]);
+        return () => {
+            ignore = true;
+        };
+    }, [month, reloadKey, subdivisionId, year]);
+
+    React.useEffect(() => {
+        if (!data || data.subdivisions.length === 0) return;
+        const requestedSubdivision = data.subdivisions.find((item) => {
+            return item.id === routeSearch.subdivision;
+        });
+        const requestedManagementSubdivision = data.subdivisions.find((item) => {
+            return item.managementId === routeSearch.management;
+        });
+        const workspace =
+            requestedSubdivision &&
+            (!routeSearch.management || requestedSubdivision.managementId === routeSearch.management)
+                ? requestedSubdivision
+                : (requestedManagementSubdivision ?? requestedSubdivision ?? data.subdivisions[0]);
+        if (
+            routeSearch.management === workspace.managementId &&
+            routeSearch.subdivision === workspace.id &&
+            routeSearch.view === view &&
+            routeSearch.year === year &&
+            routeSearch.month === month
+        )
+            return;
+        updateRoute(
+            {
+                management: workspace.managementId,
+                subdivision: workspace.id,
+                view,
+                year,
+                month,
+            },
+            true
+        );
+    }, [data, month, routeSearch, updateRoute, view, year]);
 
     if (loadError) {
         return (
@@ -489,6 +547,22 @@ const Home: React.FC = () => {
             </div>
         );
 
+    const workspace =
+        data.subdivisions.find((item) => {
+            return item.id === subdivisionId;
+        }) ?? data.subdivisions[0];
+    if (!workspace) throw new Error('У Supabase немає активних підрозділів.');
+    const managements = [
+        ...new Map(
+            data.subdivisions.map((item) => {
+                return [item.managementId, { id: item.managementId, name: item.managementName }];
+            })
+        ).values(),
+    ];
+    const managementSubdivisions = data.subdivisions.filter((item) => {
+        return item.managementId === workspace.managementId;
+    });
+
     const days = Array.from({ length: getDaysInMonth(year, month) }, (_, index) => {
         return index + 1;
     });
@@ -505,14 +579,7 @@ const Home: React.FC = () => {
         if (!cellSelection) return;
         setSaving(true);
         try {
-            setData(
-                await calendarApi.setTopics(
-                    cellSelection.groupId,
-                    cellSelection.date,
-                    topics,
-                    calendarApi.defaultSubdivisionId
-                )
-            );
+            setData(await calendarApi.setTopics(cellSelection.groupId, cellSelection.date, topics, workspace.id));
             setSavedAt(new Date());
             setCellSelection(null);
             toast.success('Публікації збережено');
@@ -551,7 +618,7 @@ const Home: React.FC = () => {
                         type="button"
                         data-active={view === 'calendar'}
                         onClick={() => {
-                            return setView('calendar');
+                            return updateRoute({ view: 'calendar' });
                         }}
                     >
                         <CalendarDays size={18} />
@@ -561,7 +628,7 @@ const Home: React.FC = () => {
                         type="button"
                         data-active={view === 'analytics'}
                         onClick={() => {
-                            return setView('analytics');
+                            return updateRoute({ view: 'analytics' });
                         }}
                     >
                         <BarChart3 size={18} />
@@ -615,8 +682,51 @@ const Home: React.FC = () => {
             </aside>
             <main className={s.main}>
                 <header className={s.topbar}>
-                    <div className={s.breadcrumbs}>
-                        Центральне управління <span>/</span> Київський підрозділ
+                    <div className={s.breadcrumbs} aria-label="Вибір робочого простору">
+                        <label>
+                            <span>Управління</span>
+                            <select
+                                aria-label="Управління"
+                                value={workspace.managementId}
+                                onChange={(event) => {
+                                    const nextSubdivision = data.subdivisions.find((item) => {
+                                        return item.managementId === event.target.value;
+                                    });
+                                    if (nextSubdivision)
+                                        updateRoute({
+                                            management: nextSubdivision.managementId,
+                                            subdivision: nextSubdivision.id,
+                                        });
+                                }}
+                            >
+                                {managements.map((item) => {
+                                    return (
+                                        <option key={item.id} value={item.id}>
+                                            {item.name}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </label>
+                        <ChevronRight size={15} aria-hidden="true" />
+                        <label>
+                            <span>Підрозділ</span>
+                            <select
+                                aria-label="Підрозділ"
+                                value={workspace.id}
+                                onChange={(event) => {
+                                    return updateRoute({ subdivision: event.target.value });
+                                }}
+                            >
+                                {managementSubdivisions.map((item) => {
+                                    return (
+                                        <option key={item.id} value={item.id}>
+                                            {item.name}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </label>
                     </div>
                     <div className={s.status} data-saving={saving}>
                         <span />
@@ -655,7 +765,7 @@ const Home: React.FC = () => {
                                 type="button"
                                 data-active={view === 'calendar'}
                                 onClick={() => {
-                                    return setView('calendar');
+                                    return updateRoute({ view: 'calendar' });
                                 }}
                             >
                                 <CalendarDays size={16} />
@@ -665,7 +775,7 @@ const Home: React.FC = () => {
                                 type="button"
                                 data-active={view === 'analytics'}
                                 onClick={() => {
-                                    return setView('analytics');
+                                    return updateRoute({ view: 'analytics' });
                                 }}
                             >
                                 <BarChart3 size={16} />
@@ -690,7 +800,7 @@ const Home: React.FC = () => {
                             aria-label="Місяць"
                             value={month}
                             onChange={(event) => {
-                                return setMonth(Number(event.target.value));
+                                return updateRoute({ month: Number(event.target.value) });
                             }}
                         >
                             {MONTHS.map((label, index) => {
@@ -705,7 +815,7 @@ const Home: React.FC = () => {
                             aria-label="Рік"
                             value={year}
                             onChange={(event) => {
-                                return setYear(Number(event.target.value));
+                                return updateRoute({ year: Number(event.target.value) });
                             }}
                         >
                             {YEARS.map((item) => {
@@ -716,8 +826,7 @@ const Home: React.FC = () => {
                             type="button"
                             className={s.todayButton}
                             onClick={() => {
-                                setYear(initialYear);
-                                setMonth(initialMonth);
+                                updateRoute({ year: initialYear, month: initialMonth });
                             }}
                         >
                             Сьогодні
@@ -894,6 +1003,7 @@ const Home: React.FC = () => {
                 <GroupDialog
                     data={data}
                     group={editingGroup === 'new' ? null : editingGroup}
+                    workspace={workspace}
                     onClose={() => {
                         return setEditingGroup(null);
                     }}

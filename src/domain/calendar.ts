@@ -14,6 +14,13 @@ export type Employee = {
     fullName: string;
 };
 
+export type WorkspaceSubdivision = {
+    id: string;
+    name: string;
+    managementId: string;
+    managementName: string;
+};
+
 export type SocialGroup = {
     id: string;
     name: string;
@@ -42,6 +49,7 @@ export type CalendarData = {
     entries: CalendarEntry[];
     employees: Employee[];
     bushes: string[];
+    subdivisions: WorkspaceSubdivision[];
 };
 
 export type AnalyticsRow = { label: string; value: number; color?: string };

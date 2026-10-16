@@ -2,7 +2,7 @@ import type { CalendarData, SocialGroup, Topic } from '@/domain/calendar';
 import { validateTopics } from '@/domain/calendar';
 import { createDemoData } from './demoData';
 
-const STORAGE_KEY = 'publication-calendar-demo-v1';
+const STORAGE_KEY = 'publication-calendar-demo-v2';
 
 const loadData = (): CalendarData => {
     const saved = localStorage.getItem(STORAGE_KEY);

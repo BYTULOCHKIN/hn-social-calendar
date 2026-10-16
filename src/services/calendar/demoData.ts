@@ -2,6 +2,7 @@ import type { CalendarData, CalendarEntry, Employee, SocialGroup, Topic } from '
 import { toDateKey } from '@/domain/calendar';
 
 export const DEMO_SUBDIVISION_ID = 'subdivision-kyiv-center';
+export const DEMO_MANAGEMENT_ID = 'management-central';
 
 export const DEMO_EMPLOYEES: Employee[] = [
     { id: 'employee-1', fullName: 'Ковальчук Олена Сергіївна' },
@@ -60,6 +61,14 @@ export const createDemoData = (): CalendarData => {
     return {
         employees: DEMO_EMPLOYEES,
         bushes: ['Кущ Північ', 'Кущ Лівий берег', 'Кущ Центр', 'Кущ Південь', 'Кущ Захід'],
+        subdivisions: [
+            {
+                id: DEMO_SUBDIVISION_ID,
+                name: 'Київський центральний підрозділ',
+                managementId: DEMO_MANAGEMENT_ID,
+                managementName: 'Центральне управління',
+            },
+        ],
         groups: DEMO_GROUPS,
         entries: [
             demoEntry('group-1', 2, ['Інформаційний пост'], 0),

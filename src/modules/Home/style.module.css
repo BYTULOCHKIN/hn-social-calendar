@@ -3,6 +3,7 @@
     min-height: 100svh;
     background: #f5f6f8;
     color: #172022;
+    color-scheme: light;
 }
 
 .sidebar {
@@ -196,21 +197,55 @@
 }
 
 .breadcrumbs {
-    color: #70797d;
-    font-size: 11px;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 9px;
 }
 
-.breadcrumbs span {
-    margin: 0 8px;
-    color: #c1c5c7;
+.breadcrumbs > svg {
+    flex: 0 0 auto;
+    color: #899194;
+}
+
+.breadcrumbs label {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.breadcrumbs label > span {
+    color: #687276;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.breadcrumbs select {
+    max-width: 280px;
+    padding: 2px 24px 2px 0;
+    border: 0;
+    outline: 0;
+    background-color: transparent;
+    color: #172022;
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.breadcrumbs select:focus-visible {
+    border-radius: 4px;
+    box-shadow: 0 0 0 3px rgb(22 104 91 / 0.16);
 }
 
 .status {
     display: flex;
     align-items: center;
     gap: 7px;
-    color: #7a8387;
-    font-size: 10px;
+    color: #596367;
+    font-size: 12px;
 }
 
 .status > span {
@@ -253,7 +288,7 @@
     display: block;
     margin-bottom: 6px;
     color: #1e7768;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.13em;
     text-transform: uppercase;
@@ -270,8 +305,8 @@
 
 .pageHeading p {
     margin-top: 7px;
-    color: #7a8387;
-    font-size: 11px;
+    color: #596367;
+    font-size: 13px;
 }
 
 .primaryButton,
@@ -283,10 +318,10 @@
     align-items: center;
     justify-content: center;
     gap: 7px;
-    min-height: 36px;
+    min-height: 40px;
     padding: 0 15px;
     border-radius: 7px;
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 650;
     cursor: pointer;
 }
@@ -337,13 +372,13 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    height: 30px;
+    height: 34px;
     padding: 0 12px;
     border: 0;
     border-radius: 6px;
     background: transparent;
-    color: #737c80;
-    font-size: 10px;
+    color: #505b5f;
+    font-size: 13px;
     cursor: pointer;
 }
 
@@ -356,30 +391,33 @@
 
 .toolbar select,
 .field select {
-    height: 36px;
+    height: 40px;
     padding: 0 32px 0 11px;
-    border: 1px solid #dfe2e3;
+    border: 1px solid #bfc6c8;
     border-radius: 7px;
     outline: none;
     background: #ffffff;
-    color: #3e484b;
-    font-size: 10px;
+    background-color: #ffffff;
+    color: #172022;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .search {
     display: flex;
     align-items: center;
     gap: 8px;
-    width: 190px;
-    height: 36px;
+    width: 230px;
+    height: 40px;
     padding: 0 11px;
-    border: 1px solid #dfe2e3;
+    border: 1px solid #bfc6c8;
     border-radius: 7px;
     background: #ffffff;
-    color: #969da0;
+    color: #566165;
 }
 
 .search:focus-within,
+.toolbar select:focus,
 .field input:focus,
 .field select:focus {
     border-color: #488d82;
@@ -391,7 +429,15 @@
     border: 0;
     outline: 0;
     background: transparent;
-    font-size: 10px;
+    color: #172022;
+    font-size: 14px;
+    -webkit-text-fill-color: #172022;
+}
+
+.search input::placeholder,
+.field input::placeholder {
+    color: #697478;
+    opacity: 1;
 }
 
 .calendarCard,
@@ -408,13 +454,13 @@
     height: 46px;
     padding: 0 16px;
     border-bottom: 1px solid #e6e8e9;
-    color: #7e878a;
-    font-size: 9px;
+    color: #626d71;
+    font-size: 11px;
 }
 
 .calendarMeta strong {
     color: #30393c;
-    font-size: 11px;
+    font-size: 13px;
 }
 
 .legend {
@@ -467,14 +513,14 @@
     height: 49px;
     background: #fafbfb;
     color: #596367;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 650;
 }
 
 .calendarTable th > span {
     display: block;
-    color: #adb2b4;
-    font-size: 7px;
+    color: #707a7e;
+    font-size: 9px;
     font-weight: 600;
     text-transform: uppercase;
 }
@@ -537,7 +583,7 @@
     border: 0;
     background: transparent;
     color: #273033;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 650;
     text-align: left;
     cursor: pointer;
@@ -545,16 +591,16 @@
 
 .groupName span {
     overflow: hidden;
-    color: #949b9e;
-    font-size: 8px;
+    color: #687276;
+    font-size: 10px;
     font-weight: 500;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .calendarTable td.stickyOwner {
-    color: #576165;
-    font-size: 9px;
+    color: #3f4a4e;
+    font-size: 11px;
 }
 
 .ownerAvatar {
@@ -604,7 +650,7 @@
     border-radius: 6px;
     background: var(--topic-soft);
     color: var(--topic);
-    font-size: 7px;
+    font-size: 9px;
     font-weight: 750;
 }
 
@@ -626,8 +672,8 @@
     justify-content: space-between;
     min-height: 43px;
     padding: 0 16px;
-    color: #8a9295;
-    font-size: 9px;
+    color: #626d71;
+    font-size: 11px;
 }
 
 .calendarFooter span {
@@ -638,7 +684,7 @@
 
 .calendarFooter strong {
     color: #435052;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .empty {
@@ -648,8 +694,8 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    color: #99a0a2;
-    font-size: 10px;
+    color: #626d71;
+    font-size: 12px;
 }
 
 .empty strong {
@@ -678,8 +724,8 @@
 }
 
 .metricCard > span {
-    color: #7f888b;
-    font-size: 10px;
+    color: #596367;
+    font-size: 12px;
 }
 
 .metricCard strong {
@@ -690,8 +736,8 @@
 }
 
 .metricCard small {
-    color: #92999c;
-    font-size: 8px;
+    color: #687276;
+    font-size: 10px;
 }
 
 .positive {
@@ -737,7 +783,7 @@
     border-radius: 99px;
     background: #f0f5f4;
     color: #36786d;
-    font-size: 8px;
+    font-size: 11px;
     font-weight: 650;
 }
 
@@ -753,7 +799,7 @@
     grid-template-columns: 150px 1fr 25px;
     align-items: center;
     gap: 12px;
-    font-size: 9px;
+    font-size: 12px;
 }
 
 .barLabel {
@@ -789,7 +835,7 @@
     gap: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid #eef0f1;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .avatarSmall {
@@ -810,14 +856,14 @@
 }
 
 .employeeName small {
-    color: #9ba1a3;
-    font-size: 8px;
+    color: #687276;
+    font-size: 10px;
     font-weight: 400;
 }
 
 .rank {
-    color: #a2a8aa;
-    font-size: 8px;
+    color: #687276;
+    font-size: 10px;
 }
 
 .monthChart {
@@ -853,8 +899,8 @@
 
 .monthColumn small,
 .monthValue {
-    color: #8d9598;
-    font-size: 7px;
+    color: #626d71;
+    font-size: 9px;
 }
 
 .monthValue {
@@ -915,25 +961,45 @@
     flex-direction: column;
     gap: 6px;
     margin-bottom: 14px;
-    color: #555f62;
-    font-size: 9px;
+    color: #394447;
+    font-size: 12px;
     font-weight: 600;
 }
 
 .field input {
     width: 100%;
-    height: 39px;
+    height: 42px;
     padding: 0 11px;
-    border: 1px solid #dfe2e3;
+    border: 1px solid #bfc6c8;
     border-radius: 7px;
     outline: none;
-    color: #263033;
-    font-size: 10px;
+    background-color: #ffffff;
+    color: #172022;
+    font-size: 14px;
+    font-weight: 500;
+    -webkit-text-fill-color: #172022;
 }
 
 .field select {
     width: 100%;
-    height: 39px;
+    height: 42px;
+}
+
+.field select option,
+.toolbar select option,
+.breadcrumbs select option {
+    background: #ffffff;
+    color: #172022;
+}
+
+.field input:disabled,
+.field select:disabled,
+.toolbar select:disabled {
+    background: #eef1f2;
+    color: #596367;
+    cursor: not-allowed;
+    opacity: 1;
+    -webkit-text-fill-color: #596367;
 }
 
 .fieldGrid {
@@ -975,8 +1041,8 @@
 
 .dialogDescription {
     margin: -10px 0 18px;
-    color: #7c8588;
-    font-size: 10px;
+    color: #596367;
+    font-size: 13px;
 }
 
 .topicOptions {
@@ -991,13 +1057,13 @@
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 9px;
-    min-height: 42px;
+    min-height: 46px;
     padding: 0 12px;
     border: 1px solid #e2e5e6;
     border-radius: 8px;
     background: #ffffff;
-    color: #596266;
-    font-size: 9px;
+    color: #303b3e;
+    font-size: 12px;
     text-align: left;
     cursor: pointer;
 }
@@ -1147,6 +1213,27 @@
     }
 
     .topbar {
+        position: static;
+        height: auto;
+        min-height: 70px;
+        padding: 10px 14px;
+    }
+
+    .breadcrumbs {
+        width: 100%;
+    }
+
+    .breadcrumbs label {
+        flex: 1;
+    }
+
+    .breadcrumbs select {
+        width: 100%;
+        max-width: none;
+        font-size: 12px;
+    }
+
+    .status {
         display: none;
     }
 

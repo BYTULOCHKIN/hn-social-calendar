@@ -27,6 +27,7 @@ const handler = withSupabase({ auth: 'publishable' }, async (request, context) =
             { data: groups, error: groupsError },
             { data: employees, error: employeesError },
             { data: bushes, error: bushesError },
+            { data: subdivisions, error: subdivisionsError },
         ] = await Promise.all([
             context.supabase
                 .from('social_groups')
@@ -44,9 +45,24 @@ const handler = withSupabase({ auth: 'publishable' }, async (request, context) =
                 .eq('subdivision_id', subdivisionId)
                 .eq('active', true)
                 .order('name'),
+            context.supabase
+                .from('subdivisions')
+                .select('id,name,management:managements!inner(id,name)')
+                .eq('active', true)
+                .eq('management.active', true)
+                .order('name'),
         ]);
-        if (groupsError || employeesError || bushesError)
-            return json({ message: groupsError?.message ?? employeesError?.message ?? bushesError?.message }, 500);
+        if (groupsError || employeesError || bushesError || subdivisionsError)
+            return json(
+                {
+                    message:
+                        groupsError?.message ??
+                        employeesError?.message ??
+                        bushesError?.message ??
+                        subdivisionsError?.message,
+                },
+                500
+            );
 
         const normalizedGroups = (groups ?? []).map((group: any) => ({
             id: group.id,
@@ -78,6 +94,12 @@ const handler = withSupabase({ auth: 'publishable' }, async (request, context) =
             entries,
             employees: (employees ?? []).map((employee: any) => ({ id: employee.id, fullName: employee.full_name })),
             bushes: (bushes ?? []).map((bush: any) => bush.name),
+            subdivisions: (subdivisions ?? []).map((subdivision: any) => ({
+                id: subdivision.id,
+                name: subdivision.name,
+                managementId: subdivision.management.id,
+                managementName: subdivision.management.name,
+            })),
         });
     }
 
