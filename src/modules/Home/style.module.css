@@ -215,6 +215,10 @@
     gap: 2px;
 }
 
+.breadcrumbs [data-slot="native-select-wrapper"] {
+    width: 100%;
+}
+
 .breadcrumbs label > span {
     color: #687276;
     font-size: 9px;
@@ -382,7 +386,7 @@
     cursor: pointer;
 }
 
-.segmented button[data-active="true"] {
+.segmented button[data-state="active"] {
     background: #ffffff;
     color: #1b292b;
     box-shadow: 0 1px 4px rgb(20 30 32 / 0.12);
@@ -401,6 +405,10 @@
     color: #172022;
     font-size: 14px;
     font-weight: 500;
+}
+
+.toolbar [data-slot="native-select-wrapper"] {
+    flex: 0 0 auto;
 }
 
 .search {
@@ -908,19 +916,9 @@
     font-weight: 650;
 }
 
-.overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: grid;
-    padding: 20px;
-    place-items: center;
-    background: rgb(17 30 31 / 0.48);
-    backdrop-filter: blur(3px);
-}
-
 .dialog {
     width: min(600px, 100%);
+    max-width: 600px !important;
     padding: 25px;
     border: 1px solid #e0e4e3;
     border-radius: 13px;
@@ -931,6 +929,11 @@
 
 .topicDialog {
     width: min(510px, 100%);
+    max-width: 510px !important;
+}
+
+.dialog > form {
+    display: contents;
 }
 
 .dialogHeader {
@@ -964,6 +967,10 @@
     color: #394447;
     font-size: 12px;
     font-weight: 600;
+}
+
+.field [data-slot="native-select-wrapper"] {
+    width: 100%;
 }
 
 .field input {

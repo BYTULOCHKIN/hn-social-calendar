@@ -32,6 +32,19 @@ import {
 } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 import { calendarApi } from '@/services/calendar/api';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import s from './style.module.css';
 
 type View = 'calendar' | 'analytics';
@@ -111,113 +124,128 @@ const GroupDialog = ({
     };
 
     return (
-        <div className={s.overlay} role="presentation" onMouseDown={onClose}>
-            <form
-                className={s.dialog}
-                onSubmit={submit}
-                onMouseDown={(event) => {
-                    return event.stopPropagation();
-                }}
-            >
-                <div className={s.dialogHeader}>
-                    <div>
-                        <span className={s.eyebrow}>Реєстр груп</span>
-                        <h2>{group ? 'Редагувати групу' : 'Нова місцева група'}</h2>
-                    </div>
-                    <button type="button" className={s.iconButton} onClick={onClose} aria-label="Закрити">
-                        <X size={18} />
-                    </button>
-                </div>
-                <label className={s.field}>
-                    <span>Назва групи</span>
-                    <input
-                        value={name}
-                        onChange={(event) => {
-                            return setName(event.target.value);
-                        }}
-                        placeholder="Наприклад, Оболонь Live"
-                    />
-                </label>
-                <label className={s.field}>
-                    <span>Посилання</span>
-                    <div className={s.inputWithIcon}>
-                        <Link2 size={16} />
-                        <input
-                            value={url}
-                            onChange={(event) => {
-                                return setUrl(event.target.value);
-                            }}
-                            placeholder="https://t.me/group"
-                        />
-                    </div>
-                </label>
-                <div className={s.fieldGrid}>
+        <Dialog
+            open
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+        >
+            <DialogContent className={s.dialog} showCloseButton={false}>
+                <form onSubmit={submit}>
+                    <DialogHeader className={s.dialogHeader}>
+                        <div>
+                            <span className={s.eyebrow}>Реєстр груп</span>
+                            <DialogTitle>{group ? 'Редагувати групу' : 'Нова місцева група'}</DialogTitle>
+                            <DialogDescription className="sr-only">
+                                Заповніть назву, посилання, кущ і виберіть відповідального працівника.
+                            </DialogDescription>
+                        </div>
+                        <DialogClose asChild>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon-sm"
+                                className={s.iconButton}
+                                aria-label="Закрити"
+                            >
+                                <X size={18} />
+                            </Button>
+                        </DialogClose>
+                    </DialogHeader>
                     <label className={s.field}>
-                        <span>Кущ</span>
-                        <select
-                            value={bush}
+                        <span>Назва групи</span>
+                        <Input
+                            value={name}
                             onChange={(event) => {
-                                return setBush(event.target.value);
+                                return setName(event.target.value);
                             }}
-                        >
-                            {data.bushes.map((item) => {
-                                return <option key={item}>{item}</option>;
-                            })}
-                        </select>
+                            placeholder="Наприклад, Оболонь Live"
+                        />
                     </label>
                     <label className={s.field}>
-                        <span>Відповідальний</span>
-                        <div className={s.employeePicker}>
-                            <input
-                                value={employeeSearch}
+                        <span>Посилання</span>
+                        <div className={s.inputWithIcon}>
+                            <Link2 size={16} />
+                            <Input
+                                value={url}
                                 onChange={(event) => {
-                                    return setEmployeeSearch(event.target.value);
+                                    return setUrl(event.target.value);
                                 }}
-                                placeholder="Пошук за ПІБ…"
-                                aria-label="Пошук відповідального за ПІБ"
+                                placeholder="https://t.me/group"
                             />
-                            <select
-                                value={employeeId}
-                                onChange={(event) => {
-                                    return setEmployeeId(event.target.value);
-                                }}
-                            >
-                                {filteredEmployees.map((item) => {
-                                    return (
-                                        <option key={item.id} value={item.id}>
-                                            {item.fullName}
-                                        </option>
-                                    );
-                                })}
-                            </select>
-                            <small>
-                                Знайдено {filteredEmployees.length} із {data.employees.length}
-                            </small>
                         </div>
                     </label>
-                </div>
-                <div className={s.dialogFooter}>
-                    {group && (
-                        <button
-                            type="button"
-                            className={s.deactivateButton}
-                            onClick={() => {
-                                return onSave({ ...group, active: false });
-                            }}
-                        >
-                            Деактивувати
-                        </button>
-                    )}
-                    <span className={s.dialogSpacer} />
-                    <button type="button" className={s.secondaryButton} onClick={onClose}>
-                        Скасувати
-                    </button>
-                    <button type="submit" className={s.primaryButton} disabled={busy}>
-                        {busy ? 'Збереження…' : 'Зберегти групу'}
-                    </button>
-                </div>
-            </form>
-        </div>
+                    <div className={s.fieldGrid}>
+                        <label className={s.field}>
+                            <span>Кущ</span>
+                            <NativeSelect
+                                value={bush}
+                                onChange={(event) => {
+                                    return setBush(event.target.value);
+                                }}
+                            >
+                                {data.bushes.map((item) => {
+                                    return <NativeSelectOption key={item}>{item}</NativeSelectOption>;
+                                })}
+                            </NativeSelect>
+                        </label>
+                        <label className={s.field}>
+                            <span>Відповідальний</span>
+                            <div className={s.employeePicker}>
+                                <Input
+                                    value={employeeSearch}
+                                    onChange={(event) => {
+                                        return setEmployeeSearch(event.target.value);
+                                    }}
+                                    placeholder="Пошук за ПІБ…"
+                                    aria-label="Пошук відповідального за ПІБ"
+                                />
+                                <NativeSelect
+                                    value={employeeId}
+                                    onChange={(event) => {
+                                        return setEmployeeId(event.target.value);
+                                    }}
+                                >
+                                    {filteredEmployees.map((item) => {
+                                        return (
+                                            <NativeSelectOption key={item.id} value={item.id}>
+                                                {item.fullName}
+                                            </NativeSelectOption>
+                                        );
+                                    })}
+                                </NativeSelect>
+                                <small>
+                                    Знайдено {filteredEmployees.length} із {data.employees.length}
+                                </small>
+                            </div>
+                        </label>
+                    </div>
+                    <DialogFooter className={s.dialogFooter}>
+                        {group && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className={s.deactivateButton}
+                                onClick={() => {
+                                    return onSave({ ...group, active: false });
+                                }}
+                            >
+                                Деактивувати
+                            </Button>
+                        )}
+                        <span className={s.dialogSpacer} />
+                        <DialogClose asChild>
+                            <Button type="button" variant="outline" className={s.secondaryButton}>
+                                Скасувати
+                            </Button>
+                        </DialogClose>
+                        <Button type="submit" className={s.primaryButton} disabled={busy}>
+                            {busy ? 'Збереження…' : 'Зберегти групу'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -253,34 +281,43 @@ const TopicDialog = ({
     };
 
     return (
-        <div className={s.overlay} role="presentation" onMouseDown={onClose}>
-            <div
-                className={`${s.dialog} ${s.topicDialog}`}
-                onMouseDown={(event) => {
-                    return event.stopPropagation();
-                }}
-            >
-                <div className={s.dialogHeader}>
+        <Dialog
+            open
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+        >
+            <DialogContent className={`${s.dialog} ${s.topicDialog}`} showCloseButton={false}>
+                <DialogHeader className={s.dialogHeader}>
                     <div>
                         <span className={s.eyebrow}>{group?.name}</span>
-                        <h2>
+                        <DialogTitle>
                             {new Date(`${selection.date}T00:00:00`).toLocaleDateString('uk-UA', { dateStyle: 'long' })}
-                        </h2>
+                        </DialogTitle>
                     </div>
-                    <button type="button" className={s.iconButton} onClick={onClose} aria-label="Закрити">
-                        <X size={18} />
-                    </button>
-                </div>
-                <p className={s.dialogDescription}>
+                    <DialogClose asChild>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon-sm"
+                            className={s.iconButton}
+                            aria-label="Закрити"
+                        >
+                            <X size={18} />
+                        </Button>
+                    </DialogClose>
+                </DialogHeader>
+                <DialogDescription className={s.dialogDescription}>
                     Оберіть до двох тематик. Кожна тематика рахується як окрема публікація.
-                </p>
+                </DialogDescription>
                 <div className={s.topicOptions}>
                     {TOPICS.map((topic) => {
                         const active = selected.includes(topic);
                         return (
-                            <button
+                            <Button
                                 key={topic}
                                 type="button"
+                                variant="outline"
                                 className={s.topicOption}
                                 data-active={active}
                                 style={
@@ -296,22 +333,23 @@ const TopicDialog = ({
                                 <span className={s.topicDot} />
                                 {topic}
                                 {active && <Check size={17} />}
-                            </button>
+                            </Button>
                         );
                     })}
                 </div>
-                <div className={s.dialogFooter}>
-                    <button
+                <DialogFooter className={s.dialogFooter}>
+                    <Button
                         type="button"
+                        variant="ghost"
                         className={s.clearButton}
                         onClick={() => {
                             return setSelected([]);
                         }}
                     >
                         Очистити день
-                    </button>
+                    </Button>
                     <span className={s.dialogSpacer} />
-                    <button
+                    <Button
                         type="button"
                         className={s.primaryButton}
                         disabled={busy}
@@ -322,10 +360,10 @@ const TopicDialog = ({
                         }}
                     >
                         {busy ? 'Збереження…' : `Зберегти (${selected.length}/2)`}
-                    </button>
-                </div>
-            </div>
-        </div>
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -548,7 +586,7 @@ const Home: React.FC = () => {
                     <span className={s.eyebrow}>Помилка завантаження</span>
                     <h1>Не вдалося відкрити календар</h1>
                     <p>{loadError}</p>
-                    <button
+                    <Button
                         type="button"
                         className={s.primaryButton}
                         onClick={() => {
@@ -558,7 +596,7 @@ const Home: React.FC = () => {
                         }}
                     >
                         Спробувати ще раз
-                    </button>
+                    </Button>
                 </section>
             </main>
         );
@@ -639,8 +677,9 @@ const Home: React.FC = () => {
                 </div>
                 <nav className={s.nav} aria-label="Головна навігація">
                     <span className={s.navLabel}>Робочий простір</span>
-                    <button
+                    <Button
                         type="button"
+                        variant="ghost"
                         data-active={view === 'calendar'}
                         onClick={() => {
                             return updateRoute({ view: 'calendar' });
@@ -648,9 +687,10 @@ const Home: React.FC = () => {
                     >
                         <CalendarDays size={18} />
                         Календар
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         type="button"
+                        variant="ghost"
                         data-active={view === 'analytics'}
                         onClick={() => {
                             return updateRoute({ view: 'analytics' });
@@ -658,20 +698,20 @@ const Home: React.FC = () => {
                     >
                         <BarChart3 size={18} />
                         Аналітика
-                    </button>
-                    <button type="button">
+                    </Button>
+                    <Button type="button" variant="ghost">
                         <Users size={18} />
                         Групи та команда
-                    </button>
+                    </Button>
                     <span className={s.navLabel}>Адміністрування</span>
-                    <button type="button">
+                    <Button type="button" variant="ghost">
                         <LayoutGrid size={18} />
                         Структура
-                    </button>
-                    <button type="button">
+                    </Button>
+                    <Button type="button" variant="ghost">
                         <Settings size={18} />
                         Налаштування
-                    </button>
+                    </Button>
                 </nav>
                 <div className={s.sidebarBottom}>
                     <div className={s.demoCard}>
@@ -684,8 +724,9 @@ const Home: React.FC = () => {
                         </div>
                     </div>
                     {calendarApi.mode === 'demo' && (
-                        <button
+                        <Button
                             type="button"
+                            variant="ghost"
                             className={s.resetLink}
                             onClick={async () => {
                                 setData(await calendarApi.resetDemo());
@@ -694,7 +735,7 @@ const Home: React.FC = () => {
                         >
                             <RotateCcw size={15} />
                             Відновити демо
-                        </button>
+                        </Button>
                     )}
                     <div className={s.profile}>
                         <span className={s.avatar}>ОК</span>
@@ -710,7 +751,7 @@ const Home: React.FC = () => {
                     <div className={s.breadcrumbs} aria-label="Вибір робочого простору">
                         <label>
                             <span>Управління</span>
-                            <select
+                            <NativeSelect
                                 aria-label="Управління"
                                 value={workspace.managementId}
                                 onChange={(event) => {
@@ -726,17 +767,17 @@ const Home: React.FC = () => {
                             >
                                 {managements.map((item) => {
                                     return (
-                                        <option key={item.id} value={item.id}>
+                                        <NativeSelectOption key={item.id} value={item.id}>
                                             {item.name}
-                                        </option>
+                                        </NativeSelectOption>
                                     );
                                 })}
-                            </select>
+                            </NativeSelect>
                         </label>
                         <ChevronRight size={15} aria-hidden="true" />
                         <label>
                             <span>Підрозділ</span>
-                            <select
+                            <NativeSelect
                                 aria-label="Підрозділ"
                                 value={workspace.id}
                                 onChange={(event) => {
@@ -745,12 +786,12 @@ const Home: React.FC = () => {
                             >
                                 {managementSubdivisions.map((item) => {
                                     return (
-                                        <option key={item.id} value={item.id}>
+                                        <NativeSelectOption key={item.id} value={item.id}>
                                             {item.name}
-                                        </option>
+                                        </NativeSelectOption>
                                     );
                                 })}
-                            </select>
+                            </NativeSelect>
                         </label>
                     </div>
                     <div className={s.status} data-saving={saving}>
@@ -772,7 +813,7 @@ const Home: React.FC = () => {
                             </p>
                         </div>
                         {view === 'calendar' && (
-                            <button
+                            <Button
                                 type="button"
                                 className={s.primaryButton}
                                 onClick={() => {
@@ -781,237 +822,236 @@ const Home: React.FC = () => {
                             >
                                 <Plus size={17} />
                                 Додати групу
-                            </button>
+                            </Button>
                         )}
                     </div>
-                    <div className={s.toolbar}>
-                        <div className={s.segmented}>
-                            <button
-                                type="button"
-                                data-active={view === 'calendar'}
-                                onClick={() => {
-                                    return updateRoute({ view: 'calendar' });
+                    <Tabs
+                        value={view}
+                        onValueChange={(nextView) => {
+                            return updateRoute({ view: nextView as View });
+                        }}
+                    >
+                        <div className={s.toolbar}>
+                            <TabsList className={s.segmented} aria-label="Режим перегляду">
+                                <TabsTrigger value="calendar">
+                                    <CalendarDays size={16} />
+                                    Календар
+                                </TabsTrigger>
+                                <TabsTrigger value="analytics">
+                                    <BarChart3 size={16} />
+                                    Аналітика
+                                </TabsTrigger>
+                            </TabsList>
+                            <div className={s.toolbarSpacer} />
+                            {view === 'calendar' && (
+                                <label className={s.search}>
+                                    <Search size={16} />
+                                    <Input
+                                        aria-label="Пошук групи"
+                                        placeholder="Знайти групу…"
+                                        value={search}
+                                        onChange={(event) => {
+                                            return setSearch(event.target.value);
+                                        }}
+                                    />
+                                </label>
+                            )}
+                            <NativeSelect
+                                aria-label="Місяць"
+                                value={month}
+                                onChange={(event) => {
+                                    return updateRoute({ month: Number(event.target.value) });
                                 }}
                             >
-                                <CalendarDays size={16} />
-                                Календар
-                            </button>
-                            <button
-                                type="button"
-                                data-active={view === 'analytics'}
-                                onClick={() => {
-                                    return updateRoute({ view: 'analytics' });
+                                {MONTHS.map((label, index) => {
+                                    return (
+                                        <NativeSelectOption value={index + 1} key={label}>
+                                            {label}
+                                        </NativeSelectOption>
+                                    );
+                                })}
+                            </NativeSelect>
+                            <NativeSelect
+                                aria-label="Рік"
+                                value={year}
+                                onChange={(event) => {
+                                    return updateRoute({ year: Number(event.target.value) });
                                 }}
                             >
-                                <BarChart3 size={16} />
-                                Аналітика
-                            </button>
+                                {YEARS.map((item) => {
+                                    return <NativeSelectOption key={item}>{item}</NativeSelectOption>;
+                                })}
+                            </NativeSelect>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className={s.todayButton}
+                                onClick={() => {
+                                    updateRoute({ year: initialYear, month: initialMonth });
+                                }}
+                            >
+                                Сьогодні
+                            </Button>
                         </div>
-                        <div className={s.toolbarSpacer} />
-                        {view === 'calendar' && (
-                            <label className={s.search}>
-                                <Search size={16} />
-                                <input
-                                    aria-label="Пошук групи"
-                                    placeholder="Знайти групу…"
-                                    value={search}
-                                    onChange={(event) => {
-                                        return setSearch(event.target.value);
-                                    }}
-                                />
-                            </label>
-                        )}
-                        <select
-                            aria-label="Місяць"
-                            value={month}
-                            onChange={(event) => {
-                                return updateRoute({ month: Number(event.target.value) });
-                            }}
-                        >
-                            {MONTHS.map((label, index) => {
-                                return (
-                                    <option value={index + 1} key={label}>
-                                        {label}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                        <select
-                            aria-label="Рік"
-                            value={year}
-                            onChange={(event) => {
-                                return updateRoute({ year: Number(event.target.value) });
-                            }}
-                        >
-                            {YEARS.map((item) => {
-                                return <option key={item}>{item}</option>;
-                            })}
-                        </select>
-                        <button
-                            type="button"
-                            className={s.todayButton}
-                            onClick={() => {
-                                updateRoute({ year: initialYear, month: initialMonth });
-                            }}
-                        >
-                            Сьогодні
-                        </button>
-                    </div>
-                    {view === 'analytics' ? (
-                        <AnalyticsView data={data} year={year} month={month} />
-                    ) : (
-                        <section className={s.calendarCard}>
-                            <div className={s.calendarMeta}>
-                                <span>
-                                    <strong>
-                                        {MONTHS[month - 1]} {year}
-                                    </strong>{' '}
-                                    · {groups.length} активних груп
-                                </span>
-                                <span className={s.legend}>
-                                    <i />
-                                    Вихідний <i />
-                                    Сьогодні
-                                </span>
-                            </div>
-                            <div className={s.tableScroller}>
-                                <table className={s.calendarTable}>
-                                    <thead>
-                                        <tr>
-                                            <th className={s.stickyGroup}>Місцева група</th>
-                                            <th className={s.stickyOwner}>Відповідальний</th>
-                                            {days.map((day) => {
-                                                const date = toDateKey(year, month, day);
+                        <TabsContent value="analytics">
+                            <AnalyticsView data={data} year={year} month={month} />
+                        </TabsContent>
+                        <TabsContent value="calendar">
+                            <section className={s.calendarCard}>
+                                <div className={s.calendarMeta}>
+                                    <span>
+                                        <strong>
+                                            {MONTHS[month - 1]} {year}
+                                        </strong>{' '}
+                                        · {groups.length} активних груп
+                                    </span>
+                                    <span className={s.legend}>
+                                        <i />
+                                        Вихідний <i />
+                                        Сьогодні
+                                    </span>
+                                </div>
+                                <div className={s.tableScroller}>
+                                    <table className={s.calendarTable}>
+                                        <thead>
+                                            <tr>
+                                                <th className={s.stickyGroup}>Місцева група</th>
+                                                <th className={s.stickyOwner}>Відповідальний</th>
+                                                {days.map((day) => {
+                                                    const date = toDateKey(year, month, day);
+                                                    return (
+                                                        <th
+                                                            key={day}
+                                                            data-weekend={isWeekend(year, month, day)}
+                                                            data-today={date === todayKey}
+                                                        >
+                                                            <span>{weekdayShort(year, month, day)}</span>
+                                                            {day}
+                                                        </th>
+                                                    );
+                                                })}
+                                                <th>Разом</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {groups.map((group) => {
+                                                const groupEntries = data.entries.filter((entry) => {
+                                                    return (
+                                                        entry.groupId === group.id &&
+                                                        entry.date.startsWith(
+                                                            `${year}-${String(month).padStart(2, '0')}`
+                                                        )
+                                                    );
+                                                });
                                                 return (
-                                                    <th
-                                                        key={day}
-                                                        data-weekend={isWeekend(year, month, day)}
-                                                        data-today={date === todayKey}
-                                                    >
-                                                        <span>{weekdayShort(year, month, day)}</span>
-                                                        {day}
-                                                    </th>
+                                                    <tr key={group.id}>
+                                                        <td className={s.stickyGroup}>
+                                                            <button
+                                                                type="button"
+                                                                className={s.groupName}
+                                                                onClick={() => {
+                                                                    return setEditingGroup(group);
+                                                                }}
+                                                            >
+                                                                {group.name}
+                                                                <span>{group.bush}</span>
+                                                            </button>
+                                                            <a
+                                                                href={group.url}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                aria-label={`Відкрити ${group.name}`}
+                                                            >
+                                                                <ExternalLink size={14} />
+                                                            </a>
+                                                        </td>
+                                                        <td className={s.stickyOwner}>
+                                                            <span className={s.ownerAvatar}>
+                                                                {group.employeeName
+                                                                    .split(' ')
+                                                                    .slice(0, 2)
+                                                                    .map((part) => {
+                                                                        return part[0];
+                                                                    })
+                                                                    .join('')}
+                                                            </span>
+                                                            <span>
+                                                                {group.employeeName.split(' ').slice(0, 2).join(' ')}
+                                                            </span>
+                                                        </td>
+                                                        {days.map((day) => {
+                                                            const date = toDateKey(year, month, day);
+                                                            const entry = groupEntries.find((item) => {
+                                                                return item.date === date;
+                                                            });
+                                                            return (
+                                                                <td
+                                                                    key={date}
+                                                                    data-weekend={isWeekend(year, month, day)}
+                                                                    data-today={date === todayKey}
+                                                                >
+                                                                    <button
+                                                                        type="button"
+                                                                        className={s.dayCell}
+                                                                        onClick={() => {
+                                                                            return setCellSelection({
+                                                                                groupId: group.id,
+                                                                                date,
+                                                                            });
+                                                                        }}
+                                                                        aria-label={`${group.name}, ${day} ${MONTHS[month - 1]}`}
+                                                                    >
+                                                                        {entry?.topics.map((topic) => {
+                                                                            return (
+                                                                                <span
+                                                                                    key={topic}
+                                                                                    title={topic}
+                                                                                    style={
+                                                                                        {
+                                                                                            '--topic':
+                                                                                                TOPIC_META[topic].color,
+                                                                                            '--topic-soft':
+                                                                                                TOPIC_META[topic].soft,
+                                                                                        } as React.CSSProperties
+                                                                                    }
+                                                                                >
+                                                                                    {TOPIC_META[topic].short}
+                                                                                </span>
+                                                                            );
+                                                                        })}
+                                                                        {!entry && <Plus size={13} />}
+                                                                    </button>
+                                                                </td>
+                                                            );
+                                                        })}
+                                                        <td className={s.totalCell}>
+                                                            {groupEntries.reduce((sum, entry) => {
+                                                                return sum + entry.topics.length;
+                                                            }, 0)}
+                                                        </td>
+                                                    </tr>
                                                 );
                                             })}
-                                            <th>Разом</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {groups.map((group) => {
-                                            const groupEntries = data.entries.filter((entry) => {
-                                                return (
-                                                    entry.groupId === group.id &&
-                                                    entry.date.startsWith(`${year}-${String(month).padStart(2, '0')}`)
-                                                );
-                                            });
-                                            return (
-                                                <tr key={group.id}>
-                                                    <td className={s.stickyGroup}>
-                                                        <button
-                                                            type="button"
-                                                            className={s.groupName}
-                                                            onClick={() => {
-                                                                return setEditingGroup(group);
-                                                            }}
-                                                        >
-                                                            {group.name}
-                                                            <span>{group.bush}</span>
-                                                        </button>
-                                                        <a
-                                                            href={group.url}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            aria-label={`Відкрити ${group.name}`}
-                                                        >
-                                                            <ExternalLink size={14} />
-                                                        </a>
-                                                    </td>
-                                                    <td className={s.stickyOwner}>
-                                                        <span className={s.ownerAvatar}>
-                                                            {group.employeeName
-                                                                .split(' ')
-                                                                .slice(0, 2)
-                                                                .map((part) => {
-                                                                    return part[0];
-                                                                })
-                                                                .join('')}
-                                                        </span>
-                                                        <span>
-                                                            {group.employeeName.split(' ').slice(0, 2).join(' ')}
-                                                        </span>
-                                                    </td>
-                                                    {days.map((day) => {
-                                                        const date = toDateKey(year, month, day);
-                                                        const entry = groupEntries.find((item) => {
-                                                            return item.date === date;
-                                                        });
-                                                        return (
-                                                            <td
-                                                                key={date}
-                                                                data-weekend={isWeekend(year, month, day)}
-                                                                data-today={date === todayKey}
-                                                            >
-                                                                <button
-                                                                    type="button"
-                                                                    className={s.dayCell}
-                                                                    onClick={() => {
-                                                                        return setCellSelection({
-                                                                            groupId: group.id,
-                                                                            date,
-                                                                        });
-                                                                    }}
-                                                                    aria-label={`${group.name}, ${day} ${MONTHS[month - 1]}`}
-                                                                >
-                                                                    {entry?.topics.map((topic) => {
-                                                                        return (
-                                                                            <span
-                                                                                key={topic}
-                                                                                title={topic}
-                                                                                style={
-                                                                                    {
-                                                                                        '--topic':
-                                                                                            TOPIC_META[topic].color,
-                                                                                        '--topic-soft':
-                                                                                            TOPIC_META[topic].soft,
-                                                                                    } as React.CSSProperties
-                                                                                }
-                                                                            >
-                                                                                {TOPIC_META[topic].short}
-                                                                            </span>
-                                                                        );
-                                                                    })}
-                                                                    {!entry && <Plus size={13} />}
-                                                                </button>
-                                                            </td>
-                                                        );
-                                                    })}
-                                                    <td className={s.totalCell}>
-                                                        {groupEntries.reduce((sum, entry) => {
-                                                            return sum + entry.topics.length;
-                                                        }, 0)}
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                                {groups.length === 0 && (
-                                    <div className={s.empty}>
-                                        <Search size={28} />
-                                        <strong>Груп не знайдено</strong>
-                                        <span>Змініть пошуковий запит або додайте нову групу.</span>
-                                    </div>
-                                )}
-                            </div>
-                            <footer className={s.calendarFooter}>
-                                <span>
-                                    <CircleHelp size={15} />
-                                    Натисніть на клітинку дня, щоб додати до двох тематик
-                                </span>
-                                <strong>{calculateAnalytics(data, year, month).total} публікацій за місяць</strong>
-                            </footer>
-                        </section>
-                    )}
+                                        </tbody>
+                                    </table>
+                                    {groups.length === 0 && (
+                                        <div className={s.empty}>
+                                            <Search size={28} />
+                                            <strong>Груп не знайдено</strong>
+                                            <span>Змініть пошуковий запит або додайте нову групу.</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <footer className={s.calendarFooter}>
+                                    <span>
+                                        <CircleHelp size={15} />
+                                        Натисніть на клітинку дня, щоб додати до двох тематик
+                                    </span>
+                                    <strong>{calculateAnalytics(data, year, month).total} публікацій за місяць</strong>
+                                </footer>
+                            </section>
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </main>
             {cellSelection && (

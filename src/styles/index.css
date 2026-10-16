@@ -1,6 +1,46 @@
 @import url("./reset.css");
+/* stylelint-disable-next-line import-notation */
+@import "tailwindcss";
+/* stylelint-disable-next-line import-notation */
+@import "tw-animate-css";
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+}
 
 :root {
+    --background: #ffffff;
+    --foreground: #172022;
+    --primary: #16685b;
+    --primary-foreground: #ffffff;
+    --secondary: #edf6f4;
+    --secondary-foreground: #115f53;
+    --muted: #eceeef;
+    --muted-foreground: #596367;
+    --accent: #edf6f4;
+    --accent-foreground: #115f53;
+    --destructive: #c03939;
+    --border: #dcdfe1;
+    --input: #bfc6c8;
+    --ring: #488d82;
+    --radius: 0.5rem;
+
     /* Common Variables */
     --color-white-100: #ffffff;
     --color-white-200: #faf9f7;
@@ -9,13 +49,10 @@
     --color-white-500: #f8f9fa;
     --color-white-600: #d2d7da;
     --color-white-700: #f7f2ee;
-    --color-primary: #1c69d4;
-    --color-secondary: #cc0000;
     --color-secondary-beige: #d0c1b1;
     --color-dark-1000: #000000;
     --color-dark-900: #0a0a0a;
     --color-dark-600: #111111;
-    --color-border: #1e1e1e;
 
     /* Focus Ring */
     --ring-width: 2px;
