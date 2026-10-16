@@ -33,6 +33,7 @@ import {
 import { toast, Toaster } from 'sonner';
 import { calendarApi } from '@/services/calendar/api';
 import { Button } from '@/components/ui/button';
+import { Combobox } from '@/components/ui/combobox';
 import {
     Dialog,
     DialogClose,
@@ -43,7 +44,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import s from './style.module.css';
 
@@ -76,7 +77,6 @@ const GroupDialog = ({
     const [name, setName] = React.useState(group?.name ?? '');
     const [url, setUrl] = React.useState(group?.url ?? '');
     const [bush, setBush] = React.useState(group?.bush ?? data.bushes[0] ?? '');
-    const [employeeSearch, setEmployeeSearch] = React.useState('');
     const [employeeId, setEmployeeId] = React.useState(
         group &&
             data.employees.some((item) => {
@@ -88,10 +88,6 @@ const GroupDialog = ({
     const [busy, setBusy] = React.useState(false);
     const employee = data.employees.find((candidate) => {
         return candidate.id === employeeId;
-    });
-    const normalizedEmployeeSearch = employeeSearch.trim().toLocaleLowerCase('uk-UA');
-    const filteredEmployees = data.employees.filter((item) => {
-        return item.id === employeeId || item.fullName.toLocaleLowerCase('uk-UA').includes(normalizedEmployeeSearch);
     });
 
     const submit = async (event: React.FormEvent) => {
@@ -193,52 +189,43 @@ const GroupDialog = ({
                         <div className={s.fieldGrid}>
                             <label className={s.field}>
                                 <span>Кущ</span>
-                                <NativeSelect
+                                <Select
                                     name="bush"
                                     required
                                     value={bush}
-                                    onChange={(event) => {
-                                        return setBush(event.target.value);
+                                    onValueChange={(value) => {
+                                        return setBush(value);
                                     }}
                                 >
-                                    {data.bushes.map((item) => {
-                                        return <NativeSelectOption key={item}>{item}</NativeSelectOption>;
-                                    })}
-                                </NativeSelect>
-                            </label>
-                            <label className={s.field}>
-                                <span>Відповідальний</span>
-                                <div className={s.employeePicker}>
-                                    <Input
-                                        type="search"
-                                        value={employeeSearch}
-                                        onChange={(event) => {
-                                            return setEmployeeSearch(event.target.value);
-                                        }}
-                                        placeholder="Пошук за ПІБ…"
-                                        aria-label="Пошук відповідального за ПІБ"
-                                    />
-                                    <NativeSelect
-                                        name="employeeId"
-                                        required
-                                        value={employeeId}
-                                        onChange={(event) => {
-                                            return setEmployeeId(event.target.value);
-                                        }}
-                                    >
-                                        {filteredEmployees.map((item) => {
+                                    <SelectTrigger aria-label="Кущ">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {data.bushes.map((item) => {
                                             return (
-                                                <NativeSelectOption key={item.id} value={item.id}>
-                                                    {item.fullName}
-                                                </NativeSelectOption>
+                                                <SelectItem key={item} value={item}>
+                                                    {item}
+                                                </SelectItem>
                                             );
                                         })}
-                                    </NativeSelect>
-                                    <small>
-                                        Знайдено {filteredEmployees.length} із {data.employees.length}
-                                    </small>
-                                </div>
+                                    </SelectContent>
+                                </Select>
                             </label>
+                            <div className={s.field}>
+                                <span>Відповідальний</span>
+                                <Combobox
+                                    aria-label="Відповідальний"
+                                    value={employeeId}
+                                    options={data.employees.map((item) => {
+                                        return { value: item.id, label: item.fullName };
+                                    })}
+                                    onValueChange={setEmployeeId}
+                                    placeholder="Оберіть відповідального"
+                                    searchPlaceholder="Пошук за ПІБ…"
+                                    emptyText="Працівника не знайдено"
+                                />
+                                <small>У списку {data.employees.length} працівників</small>
+                            </div>
                         </div>
                     </div>
                     <DialogFooter className={s.dialogFooter}>
@@ -774,12 +761,11 @@ const Home: React.FC = () => {
                     <div className={s.breadcrumbs} aria-label="Вибір робочого простору">
                         <label>
                             <span>Управління</span>
-                            <NativeSelect
-                                aria-label="Управління"
+                            <Select
                                 value={workspace.managementId}
-                                onChange={(event) => {
+                                onValueChange={(value) => {
                                     const nextSubdivision = data.subdivisions.find((item) => {
-                                        return item.managementId === event.target.value;
+                                        return item.managementId === value;
                                     });
                                     if (nextSubdivision)
                                         updateRoute({
@@ -788,33 +774,42 @@ const Home: React.FC = () => {
                                         });
                                 }}
                             >
-                                {managements.map((item) => {
-                                    return (
-                                        <NativeSelectOption key={item.id} value={item.id}>
-                                            {item.name}
-                                        </NativeSelectOption>
-                                    );
-                                })}
-                            </NativeSelect>
+                                <SelectTrigger aria-label="Управління">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {managements.map((item) => {
+                                        return (
+                                            <SelectItem key={item.id} value={item.id}>
+                                                {item.name}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
                         </label>
                         <ChevronRight size={15} aria-hidden="true" />
                         <label>
                             <span>Підрозділ</span>
-                            <NativeSelect
-                                aria-label="Підрозділ"
+                            <Select
                                 value={workspace.id}
-                                onChange={(event) => {
-                                    return updateRoute({ subdivision: event.target.value });
+                                onValueChange={(value) => {
+                                    return updateRoute({ subdivision: value });
                                 }}
                             >
-                                {managementSubdivisions.map((item) => {
-                                    return (
-                                        <NativeSelectOption key={item.id} value={item.id}>
-                                            {item.name}
-                                        </NativeSelectOption>
-                                    );
-                                })}
-                            </NativeSelect>
+                                <SelectTrigger aria-label="Підрозділ">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {managementSubdivisions.map((item) => {
+                                        return (
+                                            <SelectItem key={item.id} value={item.id}>
+                                                {item.name}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
                         </label>
                     </div>
                     <div className={s.status} data-saving={saving}>
@@ -879,32 +874,44 @@ const Home: React.FC = () => {
                                     />
                                 </label>
                             )}
-                            <NativeSelect
-                                aria-label="Місяць"
-                                value={month}
-                                onChange={(event) => {
-                                    return updateRoute({ month: Number(event.target.value) });
+                            <Select
+                                value={String(month)}
+                                onValueChange={(value) => {
+                                    return updateRoute({ month: Number(value) });
                                 }}
                             >
-                                {MONTHS.map((label, index) => {
-                                    return (
-                                        <NativeSelectOption value={index + 1} key={label}>
-                                            {label}
-                                        </NativeSelectOption>
-                                    );
-                                })}
-                            </NativeSelect>
-                            <NativeSelect
-                                aria-label="Рік"
-                                value={year}
-                                onChange={(event) => {
-                                    return updateRoute({ year: Number(event.target.value) });
+                                <SelectTrigger aria-label="Місяць">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {MONTHS.map((label, index) => {
+                                        return (
+                                            <SelectItem value={String(index + 1)} key={label}>
+                                                {label}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
+                            <Select
+                                value={String(year)}
+                                onValueChange={(value) => {
+                                    return updateRoute({ year: Number(value) });
                                 }}
                             >
-                                {YEARS.map((item) => {
-                                    return <NativeSelectOption key={item}>{item}</NativeSelectOption>;
-                                })}
-                            </NativeSelect>
+                                <SelectTrigger aria-label="Рік">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {YEARS.map((item) => {
+                                        return (
+                                            <SelectItem key={item} value={String(item)}>
+                                                {item}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
                             <Button
                                 type="button"
                                 variant="outline"

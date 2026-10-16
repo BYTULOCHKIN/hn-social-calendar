@@ -215,10 +215,6 @@
     gap: 2px;
 }
 
-.breadcrumbs [data-slot="native-select-wrapper"] {
-    width: 100%;
-}
-
 .breadcrumbs label > span {
     color: #687276;
     font-size: 9px;
@@ -227,8 +223,10 @@
     text-transform: uppercase;
 }
 
-.breadcrumbs select {
+.breadcrumbs [data-slot="select-trigger"] {
+    width: 100%;
     max-width: 280px;
+    height: 28px;
     padding: 2px 24px 2px 0;
     border: 0;
     outline: 0;
@@ -237,11 +235,18 @@
     font-size: 13px;
     font-weight: 650;
     cursor: pointer;
+    box-shadow: none;
 }
 
-.breadcrumbs select:focus-visible {
+.breadcrumbs [data-slot="select-trigger"]:focus-visible {
     border-radius: 4px;
     box-shadow: 0 0 0 3px rgb(22 104 91 / 0.16);
+}
+
+.breadcrumbs [data-slot="select-value"] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .status {
@@ -392,10 +397,10 @@
     font-weight: 600;
 }
 
-.toolbar select,
-.field select {
+.toolbar [data-slot="select-trigger"],
+.field [data-slot="select-trigger"] {
     height: 40px;
-    padding: 0 32px 0 11px;
+    padding: 0 11px;
     border: 1px solid #bfc6c8;
     border-radius: 7px;
     outline: none;
@@ -406,7 +411,7 @@
     font-weight: 500;
 }
 
-.toolbar [data-slot="native-select-wrapper"] {
+.toolbar [data-slot="select-trigger"] {
     flex: 0 0 auto;
 }
 
@@ -424,9 +429,9 @@
 }
 
 .search:focus-within,
-.toolbar select:focus,
+.toolbar [data-slot="select-trigger"]:focus-visible,
 .field input:focus,
-.field select:focus {
+.field [data-slot="select-trigger"]:focus-visible {
     border-color: #488d82;
     box-shadow: 0 0 0 3px rgb(22 104 91 / 0.1);
 }
@@ -1003,10 +1008,6 @@
     font-weight: 600;
 }
 
-.field [data-slot="native-select-wrapper"] {
-    width: 100%;
-}
-
 .field input {
     width: 100%;
     height: 42px;
@@ -1021,21 +1022,18 @@
     -webkit-text-fill-color: #172022;
 }
 
-.field select {
+.field [data-slot="select-trigger"] {
     width: 100%;
     height: 42px;
 }
 
-.field select option,
-.toolbar select option,
-.breadcrumbs select option {
-    background: #ffffff;
-    color: #172022;
+.field [role="combobox"] {
+    height: 42px;
 }
 
 .field input:disabled,
-.field select:disabled,
-.toolbar select:disabled {
+.field [data-slot="select-trigger"]:disabled,
+.toolbar [data-slot="select-trigger"]:disabled {
     background: #eef1f2;
     color: #596367;
     cursor: not-allowed;
@@ -1049,13 +1047,7 @@
     gap: 12px;
 }
 
-.employeePicker {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.employeePicker small {
+.field > small {
     color: #626d71;
     font-size: 10px;
     font-weight: 500;
@@ -1293,11 +1285,10 @@
         overflow: hidden;
     }
 
-    .breadcrumbs select {
+    .breadcrumbs [data-slot="select-trigger"] {
         width: 100%;
         max-width: none;
         font-size: 12px;
-        text-overflow: ellipsis;
     }
 
     .status {
@@ -1344,13 +1335,11 @@
         justify-content: center;
     }
 
-    .toolbar > [data-slot="native-select-wrapper"] {
+    .toolbar > [data-slot="select-trigger"] {
         width: 100%;
     }
 
-    .toolbar select,
     .field input,
-    .field select,
     .search input {
         font-size: 16px;
     }
