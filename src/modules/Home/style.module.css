@@ -343,7 +343,6 @@
 
 .primaryButton:disabled {
     opacity: 0.6;
-    cursor: wait;
 }
 
 .secondaryButton,
@@ -440,6 +439,11 @@
     color: #172022;
     font-size: 14px;
     -webkit-text-fill-color: #172022;
+}
+
+.search input:focus-visible {
+    border-color: transparent;
+    box-shadow: none;
 }
 
 .search input::placeholder,
@@ -725,6 +729,7 @@
 
 .metricCard {
     display: flex;
+    min-width: 0;
     min-height: 130px;
     flex-direction: column;
     justify-content: center;
@@ -770,6 +775,10 @@
     gap: 16px;
 }
 
+.analyticsGrid > * {
+    min-width: 0;
+}
+
 .panel {
     min-width: 0;
     padding: 21px;
@@ -804,7 +813,7 @@
 
 .barRow {
     display: grid;
-    grid-template-columns: 150px 1fr 25px;
+    grid-template-columns: minmax(0, 150px) minmax(0, 1fr) 25px;
     align-items: center;
     gap: 12px;
     font-size: 12px;
@@ -812,6 +821,7 @@
 
 .barLabel {
     display: flex;
+    min-width: 0;
     align-items: center;
     gap: 8px;
     color: #5c6669;
@@ -917,14 +927,18 @@
 }
 
 .dialog {
+    display: flex;
+    max-height: calc(100svh - 32px);
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
     width: min(600px, 100%);
     max-width: 600px !important;
-    padding: 25px;
+    padding: 0;
     border: 1px solid #e0e4e3;
     border-radius: 13px;
     background: #ffffff;
     box-shadow: 0 25px 80px rgb(10 25 27 / 0.22);
-    animation: dialog-in 180ms ease-out;
 }
 
 .topicDialog {
@@ -932,19 +946,39 @@
     max-width: 510px !important;
 }
 
-.dialog > form {
-    display: contents;
+.dialogForm {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
 }
 
 .dialogHeader {
+    flex: 0 0 auto;
+    flex-direction: row;
     justify-content: space-between;
-    margin-bottom: 22px;
+    gap: 18px;
+    padding: 22px 25px 18px;
+    border-bottom: 1px solid #eef0f1;
 }
 
 .dialogHeader h2 {
+    color: #172022;
     font-family: "Georgia", serif;
     font-size: 21px;
     font-weight: 500;
+}
+
+.dialogHeader > div {
+    min-width: 0;
+}
+
+.dialogBody {
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 22px 25px 8px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .iconButton {
@@ -1043,8 +1077,10 @@
 }
 
 .dialogFooter {
+    flex: 0 0 auto;
+    flex-direction: row;
+    justify-content: flex-end;
     gap: 8px;
-    margin: 10px -25px -25px;
     padding: 17px 25px;
     border-top: 1px solid #e8eaeb;
     border-radius: 0 0 13px 13px;
@@ -1059,7 +1095,7 @@
 }
 
 .dialogDescription {
-    margin: -10px 0 18px;
+    margin: 0 0 18px;
     color: #596367;
     font-size: 13px;
 }
@@ -1068,7 +1104,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .topicOption {
@@ -1092,6 +1128,11 @@
     background: var(--topic-soft);
     color: var(--topic);
     font-weight: 650;
+}
+
+.topicOption:hover {
+    border-color: color-mix(in srgb, var(--topic) 35%, #e2e5e6);
+    background: color-mix(in srgb, var(--topic-soft) 55%, white);
 }
 
 .topicDot {
@@ -1171,13 +1212,6 @@
     }
 }
 
-@keyframes dialog-in {
-    from {
-        transform: translateY(8px) scale(0.98);
-        opacity: 0;
-    }
-}
-
 @media (max-width: 1000px) {
     .sidebar {
         width: 205px;
@@ -1206,10 +1240,12 @@
 
     .brand {
         height: 64px;
+        padding: 0 12px;
         border-bottom: 0;
     }
 
     .brand small,
+    .brand > span:last-child,
     .navLabel,
     .sidebarBottom,
     .nav button:nth-of-type(n + 3) {
@@ -1220,11 +1256,21 @@
         flex: 1;
         flex-direction: row;
         justify-content: flex-end;
-        padding: 10px;
+        gap: 4px;
+        padding: 10px 8px;
     }
 
     .nav button {
-        width: auto;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        font-size: 0;
+    }
+
+    .nav button svg {
+        width: 18px;
+        height: 18px;
     }
 
     .main {
@@ -1243,13 +1289,15 @@
     }
 
     .breadcrumbs label {
-        flex: 1;
+        flex: 1 1 0;
+        overflow: hidden;
     }
 
     .breadcrumbs select {
         width: 100%;
         max-width: none;
         font-size: 12px;
+        text-overflow: ellipsis;
     }
 
     .status {
@@ -1261,7 +1309,9 @@
     }
 
     .pageHeading {
-        align-items: flex-end;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
     }
 
     .pageHeading p {
@@ -1269,7 +1319,9 @@
     }
 
     .toolbar {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr) auto;
+        align-items: stretch;
     }
 
     .toolbarSpacer {
@@ -1277,20 +1329,106 @@
     }
 
     .search {
-        order: 3;
+        grid-row: 3;
+        grid-column: 1 / -1;
         width: 100%;
+    }
+
+    .segmented {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    .segmented button {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .toolbar > [data-slot="native-select-wrapper"] {
+        width: 100%;
+    }
+
+    .toolbar select,
+    .field input,
+    .field select,
+    .search input {
+        font-size: 16px;
     }
 
     .tableScroller {
         max-height: 65vh;
     }
 
+    .calendarTable .stickyGroup {
+        width: 150px;
+        min-width: 150px;
+    }
+
+    .calendarTable .stickyOwner {
+        left: auto;
+        width: 140px;
+        min-width: 140px;
+        box-shadow: none;
+    }
+
+    .calendarTable tbody .stickyOwner {
+        position: static;
+    }
+
     .metricGrid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .panel {
+        padding: 17px;
+    }
+
+    .barRow {
+        grid-template-columns: minmax(90px, 0.9fr) minmax(70px, 1fr) 25px;
+        gap: 8px;
+    }
+
+    .barLabel {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .monthChart {
+        justify-content: flex-start;
+        overflow-x: auto;
+    }
+
+    .monthColumn {
+        min-width: 38px;
+        flex: 0 0 38px;
     }
 
     .fieldGrid,
     .topicOptions {
         grid-template-columns: 1fr;
+    }
+
+    .dialog {
+        width: calc(100% - 24px);
+        max-height: calc(100svh - 24px);
+        border-radius: 11px;
+    }
+
+    .dialogHeader {
+        padding: 18px 18px 15px;
+    }
+
+    .dialogBody {
+        padding: 18px 18px 6px;
+    }
+
+    .dialogFooter {
+        flex-wrap: wrap;
+        padding: 14px 18px;
+    }
+
+    .dialogFooter .dialogSpacer {
+        display: block;
     }
 }

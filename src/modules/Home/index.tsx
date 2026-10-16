@@ -72,6 +72,7 @@ const GroupDialog = ({
     onClose: () => void;
     onSave: (_group: SocialGroup) => Promise<void>;
 }) => {
+    const nameInputRef = React.useRef<HTMLInputElement>(null);
     const [name, setName] = React.useState(group?.name ?? '');
     const [url, setUrl] = React.useState(group?.url ?? '');
     const [bush, setBush] = React.useState(group?.bush ?? data.bushes[0] ?? '');
@@ -130,8 +131,15 @@ const GroupDialog = ({
                 if (!open) onClose();
             }}
         >
-            <DialogContent className={s.dialog} showCloseButton={false}>
-                <form onSubmit={submit}>
+            <DialogContent
+                className={s.dialog}
+                showCloseButton={false}
+                onOpenAutoFocus={(event) => {
+                    event.preventDefault();
+                    nameInputRef.current?.focus();
+                }}
+            >
+                <form className={s.dialogForm} onSubmit={submit}>
                     <DialogHeader className={s.dialogHeader}>
                         <div>
                             <span className={s.eyebrow}>Реєстр груп</span>
@@ -152,73 +160,86 @@ const GroupDialog = ({
                             </Button>
                         </DialogClose>
                     </DialogHeader>
-                    <label className={s.field}>
-                        <span>Назва групи</span>
-                        <Input
-                            value={name}
-                            onChange={(event) => {
-                                return setName(event.target.value);
-                            }}
-                            placeholder="Наприклад, Оболонь Live"
-                        />
-                    </label>
-                    <label className={s.field}>
-                        <span>Посилання</span>
-                        <div className={s.inputWithIcon}>
-                            <Link2 size={16} />
-                            <Input
-                                value={url}
-                                onChange={(event) => {
-                                    return setUrl(event.target.value);
-                                }}
-                                placeholder="https://t.me/group"
-                            />
-                        </div>
-                    </label>
-                    <div className={s.fieldGrid}>
+                    <div className={s.dialogBody}>
                         <label className={s.field}>
-                            <span>Кущ</span>
-                            <NativeSelect
-                                value={bush}
+                            <span>Назва групи</span>
+                            <Input
+                                ref={nameInputRef}
+                                name="groupName"
+                                required
+                                value={name}
                                 onChange={(event) => {
-                                    return setBush(event.target.value);
+                                    return setName(event.target.value);
                                 }}
-                            >
-                                {data.bushes.map((item) => {
-                                    return <NativeSelectOption key={item}>{item}</NativeSelectOption>;
-                                })}
-                            </NativeSelect>
+                                placeholder="Наприклад, Оболонь Live"
+                            />
                         </label>
                         <label className={s.field}>
-                            <span>Відповідальний</span>
-                            <div className={s.employeePicker}>
+                            <span>Посилання</span>
+                            <div className={s.inputWithIcon}>
+                                <Link2 size={16} />
                                 <Input
-                                    value={employeeSearch}
+                                    type="url"
+                                    name="groupUrl"
+                                    required
+                                    value={url}
                                     onChange={(event) => {
-                                        return setEmployeeSearch(event.target.value);
+                                        return setUrl(event.target.value);
                                     }}
-                                    placeholder="Пошук за ПІБ…"
-                                    aria-label="Пошук відповідального за ПІБ"
+                                    placeholder="https://t.me/group"
                                 />
-                                <NativeSelect
-                                    value={employeeId}
-                                    onChange={(event) => {
-                                        return setEmployeeId(event.target.value);
-                                    }}
-                                >
-                                    {filteredEmployees.map((item) => {
-                                        return (
-                                            <NativeSelectOption key={item.id} value={item.id}>
-                                                {item.fullName}
-                                            </NativeSelectOption>
-                                        );
-                                    })}
-                                </NativeSelect>
-                                <small>
-                                    Знайдено {filteredEmployees.length} із {data.employees.length}
-                                </small>
                             </div>
                         </label>
+                        <div className={s.fieldGrid}>
+                            <label className={s.field}>
+                                <span>Кущ</span>
+                                <NativeSelect
+                                    name="bush"
+                                    required
+                                    value={bush}
+                                    onChange={(event) => {
+                                        return setBush(event.target.value);
+                                    }}
+                                >
+                                    {data.bushes.map((item) => {
+                                        return <NativeSelectOption key={item}>{item}</NativeSelectOption>;
+                                    })}
+                                </NativeSelect>
+                            </label>
+                            <label className={s.field}>
+                                <span>Відповідальний</span>
+                                <div className={s.employeePicker}>
+                                    <Input
+                                        type="search"
+                                        value={employeeSearch}
+                                        onChange={(event) => {
+                                            return setEmployeeSearch(event.target.value);
+                                        }}
+                                        placeholder="Пошук за ПІБ…"
+                                        aria-label="Пошук відповідального за ПІБ"
+                                    />
+                                    <NativeSelect
+                                        name="employeeId"
+                                        required
+                                        value={employeeId}
+                                        onChange={(event) => {
+                                            return setEmployeeId(event.target.value);
+                                        }}
+                                    >
+                                        {filteredEmployees.map((item) => {
+                                            return (
+                                                <NativeSelectOption key={item.id} value={item.id}>
+                                                    {item.fullName}
+                                                </NativeSelectOption>
+                                            );
+                                        })}
+                                    </NativeSelect>
+                                    <small>
+                                        Знайдено {filteredEmployees.length} із {data.employees.length}
+                                    </small>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                     <DialogFooter className={s.dialogFooter}>
                         {group && (
@@ -307,35 +328,37 @@ const TopicDialog = ({
                         </Button>
                     </DialogClose>
                 </DialogHeader>
-                <DialogDescription className={s.dialogDescription}>
-                    Оберіть до двох тематик. Кожна тематика рахується як окрема публікація.
-                </DialogDescription>
-                <div className={s.topicOptions}>
-                    {TOPICS.map((topic) => {
-                        const active = selected.includes(topic);
-                        return (
-                            <Button
-                                key={topic}
-                                type="button"
-                                variant="outline"
-                                className={s.topicOption}
-                                data-active={active}
-                                style={
-                                    {
-                                        '--topic': TOPIC_META[topic].color,
-                                        '--topic-soft': TOPIC_META[topic].soft,
-                                    } as React.CSSProperties
-                                }
-                                onClick={() => {
-                                    return toggle(topic);
-                                }}
-                            >
-                                <span className={s.topicDot} />
-                                {topic}
-                                {active && <Check size={17} />}
-                            </Button>
-                        );
-                    })}
+                <div className={s.dialogBody}>
+                    <DialogDescription className={s.dialogDescription}>
+                        Оберіть до двох тематик. Кожна тематика рахується як окрема публікація.
+                    </DialogDescription>
+                    <div className={s.topicOptions}>
+                        {TOPICS.map((topic) => {
+                            const active = selected.includes(topic);
+                            return (
+                                <Button
+                                    key={topic}
+                                    type="button"
+                                    variant="outline"
+                                    className={s.topicOption}
+                                    data-active={active}
+                                    style={
+                                        {
+                                            '--topic': TOPIC_META[topic].color,
+                                            '--topic-soft': TOPIC_META[topic].soft,
+                                        } as React.CSSProperties
+                                    }
+                                    onClick={() => {
+                                        return toggle(topic);
+                                    }}
+                                >
+                                    <span className={s.topicDot} />
+                                    {topic}
+                                    {active && <Check size={17} />}
+                                </Button>
+                            );
+                        })}
+                    </div>
                 </div>
                 <DialogFooter className={s.dialogFooter}>
                     <Button

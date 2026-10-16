@@ -82,9 +82,9 @@
     --color-text-secondary: #737b8f;
 
     /* ── Радіуси ────────────────────────────────────────────────────────────── */
-    --radius-sm: 2rem;
-    --radius-md: 2.875rem;
-    --radius-lg: 6.25rem;
+    --legacy-radius-sm: 2rem;
+    --legacy-radius-md: 2.875rem;
+    --legacy-radius-lg: 6.25rem;
 
     /* ── Розміри кнопок ─────────────────────────────────────────────────────── */
     --button-height-big: 2.875rem;
@@ -103,8 +103,21 @@
     background-color: var(--color-primary);
 }
 
+html {
+    color-scheme: light;
+    background-color: var(--background);
+}
+
 body {
+    min-width: 320px;
+    color: var(--foreground);
+    background-color: var(--background);
     font-family: "Poppins", sans-serif;
+}
+
+#root {
+    min-height: 100vh;
+    min-height: 100svh;
 }
 
 .sr-only {

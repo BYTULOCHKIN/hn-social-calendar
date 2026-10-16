@@ -6,7 +6,7 @@
         justify-content: center;
         gap: var(--button-gap);
         border: none;
-        border-radius: var(--radius-md);
+        border-radius: var(--legacy-radius-md);
         font-family: inherit;
         font-weight: 500;
         line-height: 1;
@@ -129,7 +129,7 @@
         color: var(--color-accent);
         height: auto;
         padding: 0;
-        border-radius: var(--radius-sm);
+        border-radius: var(--legacy-radius-sm);
         text-decoration: underline;
         text-underline-offset: 3px;
         text-decoration-color: transparent;
@@ -151,7 +151,7 @@
     .wrap[data-button-variant="icon"] {
         background-color: transparent;
         color: var(--color-text-secondary);
-        border-radius: var(--radius-sm);
+        border-radius: var(--legacy-radius-sm);
         transition: all 0.2s ease;
     }
 
