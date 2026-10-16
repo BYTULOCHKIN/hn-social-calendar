@@ -33,6 +33,8 @@ npm run dev:vite
 3. Розгорніть Edge Function з `supabase/functions/calendar`.
 4. У `.env.local` встановіть `VITE_DATA_MODE=supabase`, URL, publishable key і UUID стартового підрозділу.
 
+Для Vercel потрібні саме клієнтські змінні `VITE_SUPABASE_URL` і `VITE_SUPABASE_PUBLISHABLE_KEY`. Значення без префікса `VITE_` недоступні frontend-коду Vite. Після зміни змінних середовища запустіть новий deployment.
+
 Авторизація користувача не потрібна: кожен, хто має посилання на застосунок, може переглядати й змінювати календар. Edge Function використовує `@supabase/server` з режимом `auth: 'publishable'`, а публічні операції явно дозволені RLS-політиками для ролі `anon`.
 
 `SUPABASE_SECRET_KEY` є виключно серверною змінною. Не додавайте префікс `VITE_` і не комітьте реальне значення.
