@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 export type CalendarSearch = {
     management?: string;
     subdivision?: string;
-    view?: 'calendar' | 'analytics';
+    view?: 'calendar' | 'analytics' | 'groups' | 'structure' | 'settings';
     year?: number;
     month?: number;
 };
@@ -20,7 +20,14 @@ export const validateCalendarSearch = (search: Record<string, unknown>): Calenda
     const year = parseNumber(search.year);
     const month = parseNumber(search.month);
     let view: CalendarSearch['view'];
-    if (search.view === 'calendar' || search.view === 'analytics') view = search.view;
+    if (
+        search.view === 'calendar' ||
+        search.view === 'analytics' ||
+        search.view === 'groups' ||
+        search.view === 'structure' ||
+        search.view === 'settings'
+    )
+        view = search.view;
 
     return {
         management: typeof search.management === 'string' ? search.management : undefined,

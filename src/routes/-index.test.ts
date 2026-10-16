@@ -21,12 +21,18 @@ describe('calendar URL search', () => {
     });
 
     it('drops invalid period and view values', () => {
-        expect(validateCalendarSearch({ view: 'settings', year: '2040', month: '13' })).toEqual({
+        expect(validateCalendarSearch({ view: 'unknown', year: '2040', month: '13' })).toEqual({
             management: undefined,
             subdivision: undefined,
             view: undefined,
             year: undefined,
             month: undefined,
         });
+    });
+
+    it('preserves directory and administration page views', () => {
+        expect(validateCalendarSearch({ view: 'groups' }).view).toBe('groups');
+        expect(validateCalendarSearch({ view: 'structure' }).view).toBe('structure');
+        expect(validateCalendarSearch({ view: 'settings' }).view).toBe('settings');
     });
 });

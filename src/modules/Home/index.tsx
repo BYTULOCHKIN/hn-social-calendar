@@ -16,7 +16,6 @@ import {
     BarChart3,
     CalendarDays,
     Check,
-    ChevronDown,
     ChevronRight,
     CircleHelp,
     ExternalLink,
@@ -48,7 +47,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import s from './style.module.css';
 
-type View = 'calendar' | 'analytics';
+type View = 'calendar' | 'analytics' | 'groups' | 'structure' | 'settings';
 type CellSelection = { groupId: string; date: string } | null;
 
 const current = new Date();
@@ -509,6 +508,313 @@ const AnalyticsView = ({ data, year, month }: { data: CalendarData; year: number
     );
 };
 
+const getInitials = (name: string) => {
+    return name
+        .split(' ')
+        .slice(0, 2)
+        .map((part) => {
+            return part[0];
+        })
+        .join('');
+};
+
+const GroupsAndTeamView = ({ data }: { data: CalendarData }) => {
+    const groups = [...data.groups].sort((a, b) => {
+        return a.position - b.position;
+    });
+    const employeeGroups = new Map<string, SocialGroup[]>();
+    groups.forEach((group) => {
+        const assigned = employeeGroups.get(group.employeeId) ?? [];
+        assigned.push(group);
+        employeeGroups.set(group.employeeId, assigned);
+    });
+    const employees = [...data.employees].sort((a, b) => {
+        return a.fullName.localeCompare(b.fullName, 'uk-UA');
+    });
+
+    return (
+        <section className={s.directoryPage}>
+            <div className={s.summaryGrid}>
+                <article className={s.summaryCard}>
+                    <span className={s.summaryIcon}>
+                        <LayoutGrid size={18} />
+                    </span>
+                    <div>
+                        <small>Місцеві групи</small>
+                        <strong>{groups.length}</strong>
+                    </div>
+                </article>
+                <article className={s.summaryCard}>
+                    <span className={s.summaryIcon}>
+                        <Users size={18} />
+                    </span>
+                    <div>
+                        <small>Працівники</small>
+                        <strong>{employees.length}</strong>
+                    </div>
+                </article>
+                <article className={s.summaryCard}>
+                    <span className={s.summaryIcon}>
+                        <Check size={18} />
+                    </span>
+                    <div>
+                        <small>Активні групи</small>
+                        <strong>
+                            {
+                                groups.filter((group) => {
+                                    return group.active;
+                                }).length
+                            }
+                        </strong>
+                    </div>
+                </article>
+            </div>
+            <div className={s.readonlyGrid}>
+                <article className={`${s.panel} ${s.readonlyPanel}`}>
+                    <div className={s.panelHeading}>
+                        <div>
+                            <span className={s.eyebrow}>Лише перегляд</span>
+                            <h3>Місцеві групи</h3>
+                        </div>
+                        <span className={s.panelTotal}>{groups.length}</span>
+                    </div>
+                    <div className={s.readonlyScroller}>
+                        <table className={s.readonlyTable}>
+                            <thead>
+                                <tr>
+                                    <th>Група</th>
+                                    <th>Кущ</th>
+                                    <th>Відповідальний</th>
+                                    <th>Статус</th>
+                                    <th aria-label="Посилання" />
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {groups.map((group) => {
+                                    return (
+                                        <tr key={group.id}>
+                                            <td>
+                                                <strong>{group.name}</strong>
+                                                <small>{group.subdivisionName}</small>
+                                            </td>
+                                            <td>{group.bush}</td>
+                                            <td>{group.employeeName}</td>
+                                            <td>
+                                                <span className={s.statusBadge} data-active={group.active}>
+                                                    {group.active ? 'Активна' : 'Неактивна'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a
+                                                    href={group.url}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    aria-label={`Відкрити ${group.name}`}
+                                                >
+                                                    <ExternalLink size={15} />
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+                <article className={`${s.panel} ${s.readonlyPanel}`}>
+                    <div className={s.panelHeading}>
+                        <div>
+                            <span className={s.eyebrow}>Лише перегляд</span>
+                            <h3>Команда</h3>
+                        </div>
+                        <span className={s.panelTotal}>{employees.length}</span>
+                    </div>
+                    <div className={s.teamList}>
+                        {employees.map((employee) => {
+                            const assignedGroups = employeeGroups.get(employee.id) ?? [];
+                            return (
+                                <div className={s.teamRow} key={employee.id}>
+                                    <span className={s.avatarSmall}>{getInitials(employee.fullName)}</span>
+                                    <span className={s.employeeName}>
+                                        {employee.fullName}
+                                        <small>
+                                            {assignedGroups.length
+                                                ? assignedGroups
+                                                      .map((group) => {
+                                                          return group.name;
+                                                      })
+                                                      .join(', ')
+                                                : 'Групи не призначені'}
+                                        </small>
+                                    </span>
+                                    <strong>{assignedGroups.length}</strong>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </article>
+            </div>
+        </section>
+    );
+};
+
+const StructureView = ({ data, workspace }: { data: CalendarData; workspace: WorkspaceSubdivision }) => {
+    const structure = [
+        ...new Map(
+            data.subdivisions.map((subdivision) => {
+                return [
+                    subdivision.managementId,
+                    {
+                        id: subdivision.managementId,
+                        name: subdivision.managementName,
+                        subdivisions: data.subdivisions.filter((item) => {
+                            return item.managementId === subdivision.managementId;
+                        }),
+                    },
+                ];
+            })
+        ).values(),
+    ];
+
+    return (
+        <section className={s.structurePage}>
+            <div className={s.summaryGrid}>
+                <article className={s.summaryCard}>
+                    <span className={s.summaryIcon}>
+                        <LayoutGrid size={18} />
+                    </span>
+                    <div>
+                        <small>Управління</small>
+                        <strong>{structure.length}</strong>
+                    </div>
+                </article>
+                <article className={s.summaryCard}>
+                    <span className={s.summaryIcon}>
+                        <CalendarDays size={18} />
+                    </span>
+                    <div>
+                        <small>Підрозділи</small>
+                        <strong>{data.subdivisions.length}</strong>
+                    </div>
+                </article>
+                <article className={s.summaryCard}>
+                    <span className={s.summaryIcon}>
+                        <Users size={18} />
+                    </span>
+                    <div>
+                        <small>Кущі</small>
+                        <strong>{data.bushes.length}</strong>
+                    </div>
+                </article>
+            </div>
+            <div className={s.structureGrid}>
+                <div className={s.structureList}>
+                    {structure.map((management) => {
+                        return (
+                            <article className={s.structureCard} key={management.id}>
+                                <div className={s.structureHeader}>
+                                    <span className={s.structureIcon}>
+                                        <LayoutGrid size={17} />
+                                    </span>
+                                    <div>
+                                        <small>Управління</small>
+                                        <h3>{management.name}</h3>
+                                    </div>
+                                    <span className={s.panelTotal}>{management.subdivisions.length}</span>
+                                </div>
+                                <div className={s.subdivisionList}>
+                                    {management.subdivisions.map((subdivision) => {
+                                        const current = subdivision.id === workspace.id;
+                                        return (
+                                            <div
+                                                className={s.subdivisionRow}
+                                                data-current={current}
+                                                key={subdivision.id}
+                                            >
+                                                <span />
+                                                <div>
+                                                    <strong>{subdivision.name}</strong>
+                                                    <small>{current ? 'Поточний робочий простір' : 'Підрозділ'}</small>
+                                                </div>
+                                                {current && <span className={s.currentBadge}>Вибрано</span>}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </article>
+                        );
+                    })}
+                </div>
+                <article className={`${s.panel} ${s.bushPanel}`}>
+                    <div className={s.panelHeading}>
+                        <div>
+                            <span className={s.eyebrow}>Довідник</span>
+                            <h3>Кущі</h3>
+                        </div>
+                        <span className={s.panelTotal}>{data.bushes.length}</span>
+                    </div>
+                    <div className={s.bushList}>
+                        {data.bushes.map((bush) => {
+                            const groupCount = data.groups.filter((group) => {
+                                return group.bush === bush;
+                            }).length;
+                            return (
+                                <div key={bush}>
+                                    <span>{bush}</span>
+                                    <small>
+                                        {groupCount ? `${groupCount} груп` : 'Немає груп у вибраному підрозділі'}
+                                    </small>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </article>
+            </div>
+        </section>
+    );
+};
+
+const SettingsView = () => {
+    return (
+        <section className={s.comingSoon}>
+            <span>
+                <Settings size={28} />
+            </span>
+            <small>Налаштування</small>
+            <h2>Сторінка в розробці</h2>
+            <p>Тут з’являться параметри календаря, інтеграцій та робочого простору.</p>
+        </section>
+    );
+};
+
+const VIEW_COPY: Record<View, { eyebrow: string; title: string; description: string }> = {
+    calendar: {
+        eyebrow: 'Робочий календар',
+        title: 'Публікації у місцевих групах',
+        description: 'Фіксуйте тематику публікацій та відстежуйте активність команди.',
+    },
+    analytics: {
+        eyebrow: 'Зведена статистика',
+        title: 'Аналітика публікацій',
+        description: 'Оцінюйте активність підрозділів, тематик і відповідальних.',
+    },
+    groups: {
+        eyebrow: 'Довідник',
+        title: 'Групи та команда',
+        description: 'Переглядайте місцеві групи та закріплених за ними працівників.',
+    },
+    structure: {
+        eyebrow: 'Організація',
+        title: 'Структура компанії',
+        description: 'Актуальна ієрархія управлінь, підрозділів і кущів.',
+    },
+    settings: {
+        eyebrow: 'Адміністрування',
+        title: 'Налаштування',
+        description: 'Параметри календаря та робочого простору.',
+    },
+};
+
 const Home: React.FC = () => {
     const routeSearch = Route.useSearch();
     const navigate = Route.useNavigate();
@@ -521,6 +827,7 @@ const Home: React.FC = () => {
     const [loadError, setLoadError] = React.useState<string | null>(null);
     const [reloadKey, setReloadKey] = React.useState(0);
     const view: View = routeSearch.view ?? 'calendar';
+    const viewCopy = VIEW_COPY[view];
     const year = routeSearch.year ?? initialYear;
     const month = routeSearch.month ?? initialMonth;
     const subdivisionId = routeSearch.subdivision ?? calendarApi.defaultSubdivisionId;
@@ -709,16 +1016,37 @@ const Home: React.FC = () => {
                         <BarChart3 size={18} />
                         Аналітика
                     </Button>
-                    <Button type="button" variant="ghost">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        data-active={view === 'groups'}
+                        onClick={() => {
+                            return updateRoute({ view: 'groups' });
+                        }}
+                    >
                         <Users size={18} />
                         Групи та команда
                     </Button>
                     <span className={s.navLabel}>Адміністрування</span>
-                    <Button type="button" variant="ghost">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        data-active={view === 'structure'}
+                        onClick={() => {
+                            return updateRoute({ view: 'structure' });
+                        }}
+                    >
                         <LayoutGrid size={18} />
                         Структура
                     </Button>
-                    <Button type="button" variant="ghost">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        data-active={view === 'settings'}
+                        onClick={() => {
+                            return updateRoute({ view: 'settings' });
+                        }}
+                    >
                         <Settings size={18} />
                         Налаштування
                     </Button>
@@ -747,13 +1075,6 @@ const Home: React.FC = () => {
                             Відновити демо
                         </Button>
                     )}
-                    <div className={s.profile}>
-                        <span className={s.avatar}>ОК</span>
-                        <span>
-                            Олена Ковальчук<small>Адміністратор</small>
-                        </span>
-                        <ChevronDown size={16} />
-                    </div>
                 </div>
             </aside>
             <main className={s.main}>
@@ -820,15 +1141,9 @@ const Home: React.FC = () => {
                 <div className={s.content}>
                     <div className={s.pageHeading}>
                         <div>
-                            <span className={s.eyebrow}>
-                                {view === 'calendar' ? 'Робочий календар' : 'Зведена статистика'}
-                            </span>
-                            <h1>{view === 'calendar' ? 'Публікації у місцевих групах' : 'Аналітика публікацій'}</h1>
-                            <p>
-                                {view === 'calendar'
-                                    ? 'Фіксуйте тематику публікацій та відстежуйте активність команди.'
-                                    : 'Оцінюйте активність підрозділів, тематик і відповідальних.'}
-                            </p>
+                            <span className={s.eyebrow}>{viewCopy.eyebrow}</span>
+                            <h1>{viewCopy.title}</h1>
+                            <p>{viewCopy.description}</p>
                         </div>
                         {view === 'calendar' && (
                             <Button
@@ -849,7 +1164,7 @@ const Home: React.FC = () => {
                             return updateRoute({ view: nextView as View });
                         }}
                     >
-                        <div className={s.toolbar}>
+                        <div className={s.toolbar} hidden={view !== 'calendar' && view !== 'analytics'}>
                             <TabsList className={s.segmented} aria-label="Режим перегляду">
                                 <TabsTrigger value="calendar">
                                     <CalendarDays size={16} />
@@ -1082,6 +1397,9 @@ const Home: React.FC = () => {
                             </section>
                         </TabsContent>
                     </Tabs>
+                    {view === 'groups' && <GroupsAndTeamView data={data} />}
+                    {view === 'structure' && <StructureView data={data} workspace={workspace} />}
+                    {view === 'settings' && <SettingsView />}
                 </div>
             </main>
             {cellSelection && (
