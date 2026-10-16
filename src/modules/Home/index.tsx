@@ -44,67 +44,6 @@ const formatSavedTime = (date: Date | null) => {
     return `Збережено о ${date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}`;
 };
 
-const LoginScreen = ({ onSignedIn }: { onSignedIn: () => void }) => {
-    const [email, setEmail] = React.useState('');
-    const [password, setPassword] = React.useState('');
-    const [busy, setBusy] = React.useState(false);
-
-    return (
-        <main className={s.loginPage}>
-            <section className={s.loginCard}>
-                <span className={s.brandMark}>
-                    <CalendarDays size={22} />
-                </span>
-                <span className={s.eyebrow}>Календар публікацій</span>
-                <h1>Вхід до робочого простору</h1>
-                <p>Увійдіть через обліковий запис, створений адміністратором у Supabase Auth.</p>
-                <form
-                    onSubmit={async (event) => {
-                        event.preventDefault();
-                        setBusy(true);
-                        try {
-                            await calendarApi.signIn(email, password);
-                            onSignedIn();
-                        } catch (error) {
-                            toast.error(error instanceof Error ? error.message : 'Не вдалося увійти.');
-                        } finally {
-                            setBusy(false);
-                        }
-                    }}
-                >
-                    <label className={s.field}>
-                        <span>Email</span>
-                        <input
-                            type="email"
-                            required
-                            value={email}
-                            onChange={(event) => {
-                                return setEmail(event.target.value);
-                            }}
-                        />
-                    </label>
-                    <label className={s.field}>
-                        <span>Пароль</span>
-                        <input
-                            type="password"
-                            required
-                            minLength={6}
-                            value={password}
-                            onChange={(event) => {
-                                return setPassword(event.target.value);
-                            }}
-                        />
-                    </label>
-                    <button type="submit" className={s.primaryButton} disabled={busy}>
-                        {busy ? 'Входимо…' : 'Увійти'}
-                    </button>
-                </form>
-            </section>
-            <Toaster position="bottom-right" richColors />
-        </main>
-    );
-};
-
 const GroupDialog = ({
     data,
     group,
@@ -503,7 +442,6 @@ const Home: React.FC = () => {
     const [editingGroup, setEditingGroup] = React.useState<SocialGroup | 'new' | null>(null);
     const [saving, setSaving] = React.useState(false);
     const [savedAt, setSavedAt] = React.useState<Date | null>(null);
-    const [authRequired, setAuthRequired] = React.useState(false);
     const [loadError, setLoadError] = React.useState<string | null>(null);
     const [reloadKey, setReloadKey] = React.useState(0);
 
@@ -511,28 +449,14 @@ const Home: React.FC = () => {
         void calendarApi
             .getCalendar(calendarApi.defaultSubdivisionId, year, month)
             .then((calendar) => {
-                setAuthRequired(false);
                 setLoadError(null);
                 setData(calendar);
             })
             .catch((error: unknown) => {
                 const message = error instanceof Error ? error.message : 'Не вдалося завантажити календар.';
-                if (message === 'AUTH_REQUIRED') setAuthRequired(true);
-                else setLoadError(message);
+                setLoadError(message);
             });
     }, [month, reloadKey, year]);
-
-    if (authRequired) {
-        return (
-            <LoginScreen
-                onSignedIn={() => {
-                    return setReloadKey((value) => {
-                        return value + 1;
-                    });
-                }}
-            />
-        );
-    }
 
     if (loadError) {
         return (

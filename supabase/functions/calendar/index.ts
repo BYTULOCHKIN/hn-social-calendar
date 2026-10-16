@@ -10,7 +10,7 @@ type Topic =
 
 const json = (body: unknown, status = 200) => Response.json(body, { status });
 
-const handler = withSupabase({ auth: 'user' }, async (request, context) => {
+const handler = withSupabase({ auth: 'publishable' }, async (request, context) => {
     const url = new URL(request.url);
     const path = url.pathname.replace(/^.*\/calendar/, '');
 
@@ -23,7 +23,11 @@ const handler = withSupabase({ auth: 'user' }, async (request, context) => {
         }
         const start = `${year}-${String(month).padStart(2, '0')}-01`;
         const end = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
-        const [{ data: groups, error: groupsError }, { data: employees, error: employeesError }] = await Promise.all([
+        const [
+            { data: groups, error: groupsError },
+            { data: employees, error: employeesError },
+            { data: bushes, error: bushesError },
+        ] = await Promise.all([
             context.supabase
                 .from('social_groups')
                 .select(
@@ -34,9 +38,15 @@ const handler = withSupabase({ auth: 'user' }, async (request, context) => {
                 .lte('slots.publication_date', end)
                 .order('position'),
             context.supabase.from('employees').select('id,full_name').eq('active', true).order('full_name'),
+            context.supabase
+                .from('bushes')
+                .select('name')
+                .eq('subdivision_id', subdivisionId)
+                .eq('active', true)
+                .order('name'),
         ]);
-        if (groupsError || employeesError)
-            return json({ message: groupsError?.message ?? employeesError?.message }, 500);
+        if (groupsError || employeesError || bushesError)
+            return json({ message: groupsError?.message ?? employeesError?.message ?? bushesError?.message }, 500);
 
         const normalizedGroups = (groups ?? []).map((group: any) => ({
             id: group.id,
@@ -67,7 +77,7 @@ const handler = withSupabase({ auth: 'user' }, async (request, context) => {
             groups: normalizedGroups,
             entries,
             employees: (employees ?? []).map((employee: any) => ({ id: employee.id, fullName: employee.full_name })),
-            bushes: [...new Set(normalizedGroups.map((group: any) => group.bush))],
+            bushes: (bushes ?? []).map((bush: any) => bush.name),
         });
     }
 

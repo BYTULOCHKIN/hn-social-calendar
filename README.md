@@ -10,7 +10,8 @@ React-застосунок для щоденного обліку публіка
 - редагування й деактивація груп без втрати історії;
 - історичний знімок відповідального у кожній публікації;
 - аналітика за темами, відповідальними, підрозділами й місяцями;
-- ролі, RLS, аудит і атомарне збереження через Supabase;
+- публічний доступ за посиланням без реєстрації та авторизації;
+- RLS, аудит і атомарне збереження через Supabase;
 - локальний demo-режим для перегляду без налаштованої бази.
 
 ## Локальний запуск
@@ -27,13 +28,14 @@ npm run dev:vite
 
 ## Supabase
 
-1. Застосуйте [`supabase/migrations/202610160001_initial_schema.sql`](supabase/migrations/202610160001_initial_schema.sql) до проєкту Supabase.
+1. Застосуйте міграції з каталогу [`supabase/migrations`](supabase/migrations) до проєкту Supabase.
 2. За потреби застосуйте [`supabase/seed.sql`](supabase/seed.sql) лише в тестовому середовищі.
 3. Розгорніть Edge Function з `supabase/functions/calendar`.
-4. Створіть користувача Supabase Auth і відповідний запис у `user_profiles` та `user_subdivisions`.
-5. У `.env.local` встановіть `VITE_DATA_MODE=supabase`, URL, publishable key і UUID стартового підрозділу. Після цього застосунок покаже форму входу Supabase Auth.
+4. У `.env.local` встановіть `VITE_DATA_MODE=supabase`, URL, publishable key і UUID стартового підрозділу.
 
-`SUPABASE_SECRET_KEY` є виключно серверною змінною. Не додавайте префікс `VITE_` і не комітьте реальне значення. Edge Function використовує `@supabase/server` з режимом `auth: 'user'`, а доступ до рядків додатково обмежує RLS.
+Авторизація користувача не потрібна: кожен, хто має посилання на застосунок, може переглядати й змінювати календар. Edge Function використовує `@supabase/server` з режимом `auth: 'publishable'`, а публічні операції явно дозволені RLS-політиками для ролі `anon`.
+
+`SUPABASE_SECRET_KEY` є виключно серверною змінною. Не додавайте префікс `VITE_` і не комітьте реальне значення.
 
 ## Перевірки
 
