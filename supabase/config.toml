@@ -7,6 +7,9 @@ project_id = "social-media-publication-calendar"
 [functions.calendar]
 verify_jwt = false
 
+[functions.directory-sync]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

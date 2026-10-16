@@ -62,10 +62,22 @@ const GroupDialog = ({
     const [name, setName] = React.useState(group?.name ?? '');
     const [url, setUrl] = React.useState(group?.url ?? '');
     const [bush, setBush] = React.useState(group?.bush ?? data.bushes[0] ?? '');
-    const [employeeId, setEmployeeId] = React.useState(group?.employeeId ?? data.employees[0]?.id ?? '');
+    const [employeeSearch, setEmployeeSearch] = React.useState('');
+    const [employeeId, setEmployeeId] = React.useState(
+        group &&
+            data.employees.some((item) => {
+                return item.id === group.employeeId;
+            })
+            ? group.employeeId
+            : (data.employees[0]?.id ?? '')
+    );
     const [busy, setBusy] = React.useState(false);
     const employee = data.employees.find((candidate) => {
         return candidate.id === employeeId;
+    });
+    const normalizedEmployeeSearch = employeeSearch.trim().toLocaleLowerCase('uk-UA');
+    const filteredEmployees = data.employees.filter((item) => {
+        return item.id === employeeId || item.fullName.toLocaleLowerCase('uk-UA').includes(normalizedEmployeeSearch);
     });
 
     const submit = async (event: React.FormEvent) => {
@@ -155,20 +167,33 @@ const GroupDialog = ({
                     </label>
                     <label className={s.field}>
                         <span>Відповідальний</span>
-                        <select
-                            value={employeeId}
-                            onChange={(event) => {
-                                return setEmployeeId(event.target.value);
-                            }}
-                        >
-                            {data.employees.map((item) => {
-                                return (
-                                    <option key={item.id} value={item.id}>
-                                        {item.fullName}
-                                    </option>
-                                );
-                            })}
-                        </select>
+                        <div className={s.employeePicker}>
+                            <input
+                                value={employeeSearch}
+                                onChange={(event) => {
+                                    return setEmployeeSearch(event.target.value);
+                                }}
+                                placeholder="Пошук за ПІБ…"
+                                aria-label="Пошук відповідального за ПІБ"
+                            />
+                            <select
+                                value={employeeId}
+                                onChange={(event) => {
+                                    return setEmployeeId(event.target.value);
+                                }}
+                            >
+                                {filteredEmployees.map((item) => {
+                                    return (
+                                        <option key={item.id} value={item.id}>
+                                            {item.fullName}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                            <small>
+                                Знайдено {filteredEmployees.length} із {data.employees.length}
+                            </small>
+                        </div>
                     </label>
                 </div>
                 <div className={s.dialogFooter}>

@@ -14,6 +14,7 @@
         "dev": "run-p dev:vite dev:tsc",
         "dev:scan": "run-p dev:vite:scan dev:tsc",
         "build": "vite build",
+        "sync:employees": "node scripts/import-employees.mjs",
         "test": "vitest run",
         "preview": "vite preview --host",
         "tsc": "tsc --build",

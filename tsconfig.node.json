@@ -24,6 +24,7 @@
         "eslint.config.js",
         "prettier.config.js",
         "commitlint.config.cjs",
-        "postcss.config.cjs"
+        "postcss.config.cjs",
+        "scripts/**/*.mjs"
     ]
 }

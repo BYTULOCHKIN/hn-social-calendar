@@ -39,6 +39,29 @@ npm run dev:vite
 
 `SUPABASE_SECRET_KEY` є виключно серверною змінною. Не додавайте префікс `VITE_` і не комітьте реальне значення.
 
+## Синхронізація довідників
+
+Структура компанії синхронізується захищеною Edge Function `directory-sync`. URL і ключ зовнішнього API зберігаються лише в Supabase Secrets:
+
+```bash
+npx supabase secrets set \
+  COMPANY_STRUCTURE_API_URL=https://ipa.apc-service.net/api/service/invoke/powbi \
+  COMPANY_STRUCTURE_API_KEY=<rotated-proxy-access-key>
+npx supabase functions deploy directory-sync
+```
+
+Виклик синхронізації потребує серверного `SUPABASE_SECRET_KEY` у заголовку `apikey`. Функція завантажує актуальні управління, підрозділи, кущі та населені пункти, оновлює перейменовані записи й позначає відсутні як неактивні без фізичного видалення.
+
+Кадровий JSON не комітиться в репозиторій. Для імпорту передайте шлях до локального файлу:
+
+```bash
+SUPABASE_URL=https://your-project.supabase.co \
+SUPABASE_SECRET_KEY=<server-secret-key> \
+npm run sync:employees -- /absolute/path/GetCompanyPersonnal.json
+```
+
+Імпортер передає лише табельний ID, ПІБ і дату завершення роботи. Телефони, email, ІПН, посади та інші поля джерела не завантажуються.
+
 ## Перевірки
 
 ```bash
